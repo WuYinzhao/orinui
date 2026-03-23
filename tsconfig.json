@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "declaration": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["packages/*"],
+      "@@/*": [".dumi/tmp/*"],
+      "yss-rui": ["src"],
+      "yss-rui/*": ["src/*", "*"],
+      "@yss-rui/components": ["packages/components/src"],
+      "@yss-rui/components/*": ["packages/components/src/*"],
+      "@yss-rui/hooks": ["packages/hooks/src"],
+      "@yss-rui/hooks/*": ["packages/hooks/src/*"],
+      "@yss-rui/utils": ["packages/utils/src"],
+      "@yss-rui/utils/*": ["packages/utils/src/*"],
+      "@yss-rui/ai-skills": ["packages/ai-skills/src"],
+      "@yss-rui/ai-skills/*": ["packages/ai-skills/src/*"]
+    }
+  },
+  "references": [
+    { "path": "./packages/components" },
+    { "path": "./packages/hooks" },
+    { "path": "./packages/utils" },
+    { "path": "./packages/ai-skills" }
+  ],
+  "include": [".dumirc.ts", ".fatherrc.ts", "src/**/*", "docs/**/*"]
+}

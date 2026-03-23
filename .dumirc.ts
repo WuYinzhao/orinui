@@ -1,0 +1,94 @@
+import { defineConfig } from 'dumi';
+import * as path from 'path';
+
+export default defineConfig({
+  outputPath: 'docs-dist',
+  alias: {
+    '@yss-rui/components': path.resolve(__dirname, 'packages/components/src'),
+    '@yss-rui/hooks': path.resolve(__dirname, 'packages/hooks/src'),
+    '@yss-rui/utils': path.resolve(__dirname, 'packages/utils/src'),
+    '@yss-rui/ai-skills': path.resolve(__dirname, 'packages/ai-skills/src'),
+  },
+  themeConfig: {
+    name: 'YSS组件库',
+    nav: [
+      { title: '指南', link: '/guide' },
+      { title: '组件', link: '/components' },
+      { title: 'Hooks', link: '/hooks' },
+      { title: '工具', link: '/utils' },
+      { title: 'AI Skills', link: '/ai-skills' },
+      { title: '更新日志', link: '/changelog' },
+    ],
+    sidebar: {
+      '/components/': [
+        {
+          title: '组件',
+          children: [
+            { title: '介绍', link: '/components' },
+            { title: 'Chart 图表', link: '/components/chart' },
+            { title: 'ComplexTree 复杂树', link: '/components/complex-tree' },
+            { title: 'ListTree 左侧列表', link: '/components/list-tree' },
+            { title: 'SingleTree 侧边树', link: '/components/single-tree' },
+            { title: 'Table 表格', link: '/components/table' },
+            { title: 'DatePicker 日期选择', link: '/components/date-picker' },
+            {
+              title: 'DateRangePicker 日期范围',
+              link: '/components/date-range',
+            },
+            { title: 'EndDate 结束日期', link: '/components/end-date' },
+            {
+              title: 'ExcelHandle Excel 解析',
+              link: '/components/excel-handle',
+            },
+            { title: 'CustomSelect 树形选择', link: '/components/tree-select' },
+            { title: 'CustomModal 弹窗', link: '/components/modal' },
+            { title: 'TableHeader 表头栏', link: '/components/table-header' },
+            {
+              title: 'OperateTable 操作表格容器',
+              link: '/components/table-operate',
+            },
+            {
+              title: 'SecondHeader 二级表头',
+              link: '/components/table-second-header',
+            },
+            { title: 'TableTabs 表格页签', link: '/components/table-tabs' },
+            {
+              title: 'TitleTooltip 标题说明',
+              link: '/components/title-tooltip',
+            },
+            { title: 'Styled 布局样式', link: '/components/styled' },
+          ],
+        },
+      ],
+      '/hooks/': [
+        {
+          title: 'Hooks',
+          children: [
+            { title: '介绍', link: '/hooks' },
+            {
+              title: 'observerHeight 高度观察',
+              link: '/hooks/observer-height',
+            },
+          ],
+        },
+      ],
+      '/utils/': [
+        {
+          title: '工具函数',
+          children: [
+            { title: '介绍', link: '/utils' },
+            { title: '日期工具', link: '/utils/date' },
+            { title: '树形工具', link: '/utils/tree' },
+            { title: '表格工具', link: '/utils/table' },
+          ],
+        },
+      ],
+      '/ai-skills/': [
+        {
+          title: 'AI Skills',
+          children: [{ title: '介绍', link: '/ai-skills' }],
+        },
+      ],
+    },
+  },
+});

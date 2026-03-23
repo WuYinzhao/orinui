@@ -1,0 +1,74 @@
+---
+alwaysApply: true
+---
+
+# yss-rui 代码生成规范
+
+## 项目概览
+
+- **形态**：基于 **dumi + father + Vite** 的 React 组件库；**yarn workspaces**，工作区为 `packages/*`。
+- **文档**：dumi，源码与 demo 主要在 [`docs/`](docs/)；根目录配置见 `.dumirc.ts`、`.fatherrc.ts`。
+- **更完整的命令说明**：见仓库根目录 [`CLAUDE.md`](CLAUDE.md)。
+
+## 工作区包（生成代码时选对目录与包名）
+
+| npm 包名 | 路径 | 说明 |
+| --- | --- | --- |
+| `@yss-rui/components` | `packages/components` | 主组件库；Vite 构建，`yarn build:components` |
+| `@yss-rui/hooks` | `packages/hooks` | Hooks 包；`yarn build:hooks` |
+| `@yss-rui/utils` | `packages/utils` | 工具包；`yarn build:utils` |
+| `@yss-rui/ai-skills` | `packages/ai-skills` | AI skills 包；`yarn build:ai-skills` |
+| 根包 | `src/` | 根入口与示例；father 构建见 `yarn build` / `build:all` |
+
+## 路径别名（import 优先与 tsconfig 一致）
+
+根 [`tsconfig.json`](tsconfig.json) 中：
+
+- `@yss-rui/components`、`@yss-rui/components/*` → `packages/components/src`（及子路径）
+- `@yss-rui/hooks`、`@yss-rui/hooks/*` → `packages/hooks/src`
+- `@yss-rui/utils`、`@yss-rui/utils/*` → `packages/utils/src`
+- `@yss-rui/ai-skills`、`@yss-rui/ai-skills/*` → `packages/ai-skills/src`
+- 根别名：`yss-rui` → `src`；`@/*` → `packages/*`（根视角）
+
+各子包内通常有 `@/*` → 当前包的 `src/*`（见各包 `tsconfig.json` / `vite.config.ts`）。**跨包引用优先使用 `@yss-rui/...` 包名**；包内用 `@/`。
+
+## 技术栈与库代码约束
+
+- **React 18**、**TypeScript**（`strict`）、**antd 4.24.x**、**styled-components**；图表相关：**echarts**、**echarts-for-react**。
+- **Vite 库构建**会将 react、react-dom、antd、lodash、echarts、styled-components 等 **external**（见 `packages/components/vite.config.ts` 等）。新增依赖若应作为 peer/external，勿默认打进 bundle；需改对应包的 `rollupOptions.external` 与 `package.json` peerDependencies。
+
+## 代码风格（与 Prettier 一致）
+
+与 [`.prettierrc.js`](.prettierrc.js) 对齐，生成代码应可直接通过 lint-staged：
+
+- **单引号**
+- **`trailingComma: 'all'`**
+- **`printWidth: 80`**
+- import 会由 **prettier-plugin-organize-imports** 整理，避免手写混乱顺序。
+
+ESLint 继承 `@umijs/lint`（[`.eslintrc.js`](.eslintrc.js)）。
+
+## 常用命令
+
+- 文档开发：`yarn start`（dumi dev）
+- 全量构建：`yarn build` / `yarn build:all`
+- 单包：`yarn build:components`、`yarn build:hooks`、`yarn build:utils`、`yarn build:ai-skills`
+- 校验：`yarn lint`、`yarn lint:es`、`yarn lint:css`
+
+## Git 提交
+
+使用 **Conventional Commits**（`commitlint` + `@commitlint/config-conventional`）。
+
+## TypeScript 工程引用
+
+根 `tsconfig.json` 的 `references` 指向各 `packages/*`。**被引用子包不要同时使用 `composite: true` 与 `noEmit: true`**。当前约定：使用 **`emitDeclarationOnly` + `declaration` + `rootDir`/`outDir`（如 `dist/.tsc-ref`）**，与现有子包 tsconfig 保持一致；不要随意改回 `noEmit: true`。
+
+## 新增组件 / 模块时的习惯
+
+- 目录与命名与现有 `packages/components/src` 等保持一致（如 **kebab-case** 目录名）。
+- 在对应包的 **`src/index.ts`（或现有 barrel）** 中导出公共 API。
+- 若需要文档：在 [`docs/`](docs/) 按现有 dumi demo 与 frontmatter 模式补充（用户明确要求时再写）。
+
+## 修改范围
+
+优先 **最小改动**：只改与任务相关的文件；不顺带大重构、不删无关注释；与周边文件的 import 风格、类型与抽象层级保持一致。
