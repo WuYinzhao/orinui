@@ -1,10 +1,10 @@
-import { observerHeight } from '@yss-rui/hooks';
+import { useObserverHeight } from '@yss-rui/hooks';
 import { Card } from 'antd';
 import { useRef } from 'react';
 
 export default () => {
   const ref = useRef<HTMLDivElement>(null);
-  const height = observerHeight(ref);
+  const height = useObserverHeight(ref);
 
   return (
     <Card title="高度观察示例">
