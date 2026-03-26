@@ -11,8 +11,8 @@ dayjs.extend(localeData);
 dayjs.extend(quarterOfYear);
 dayjs.extend(advancedFormat);
 
+import { DateRangeProps } from './type';
 import {
-  assignDateValidate,
   getHalfYearDay,
   getInitValue,
   getLastYearDay,
@@ -24,59 +24,45 @@ const selectOptions = [
   { value: '3', label: '上半年末' },
   { value: '6', label: '上年末' },
 ];
-const endDateInit = getInitValue();
+const initDate = getInitValue();
 
-export default (props: any) => {
+export default (props: DateRangeProps) => {
   const {
     id,
     onChange,
     optionsValue = ['1', '3', '6'],
-    value = { endDate: endDateInit, selectVal: 'custom' },
+    disabledDate = (current) => {
+      return !!current && current > dayjs().subtract(1, 'days').endOf('day');
+    }, // 禁用日期
+    value = { selectVal: 'custom', ...initDate },
     format = 'YYYY-MM-DD',
     picker = 'date',
   } = props;
-  const { endDate, selectVal } = value;
+  const { selectVal, ...dateValue } = value;
   const useSelectOptions = selectOptions.filter((i) =>
     ['custom', ...optionsValue].includes(i.value),
   );
-  const [customDate, setCustomDate] = useState();
   const [dateDisabled, setDateDisabled] = useState(false);
-  const [dateState, setDateState] = useState<{
-    state: '' | 'error' | 'warning' | undefined;
-    message: string;
-  }>({ state: '', message: '' });
   useEffect(() => {
     setDateDisabled(selectVal !== 'custom');
   }, [selectVal]);
   const onDateChange = (val: any) => {
-    let endDate = val.endOf(picker).format(format);
-    if (selectVal === 'custom') setCustomDate(endDate);
-    const validate = assignDateValidate(endDate);
-    setDateState(validate);
-    onChange?.({ endDate, selectVal });
-  };
-  const disabledDate = (current: any) => {
-    return current && current >= dayjs().startOf(picker);
+    const date = val.endOf(picker);
+    onChange?.({ date: date, dateStr: date.format(format), selectVal });
   };
   const onSelectChange = (val: any) => {
-    let newValue = '';
-    if (val === 'custom') {
-      newValue = customDate || endDateInit;
-    } else {
-      if (val === '1') {
-        // 获取上季末
-        newValue = getQuarterDay('YYYY-MM-DD');
-      } else if (val === '3') {
-        // 获取上半年末
-        newValue = getHalfYearDay('YYYY-MM-DD');
-      } else if (val === '6') {
-        // 获取上年末
-        newValue = getLastYearDay('YYYY-MM-DD');
-      }
-      const validate = assignDateValidate(newValue);
-      setDateState(validate);
+    let newValue = dateValue;
+    if (val === '1') {
+      // 获取上季末
+      newValue = getQuarterDay('YYYY-MM-DD');
+    } else if (val === '3') {
+      // 获取上半年末
+      newValue = getHalfYearDay('YYYY-MM-DD');
+    } else if (val === '6') {
+      // 获取上年末
+      newValue = getLastYearDay('YYYY-MM-DD');
     }
-    onChange?.({ selectVal: val, endDate: newValue });
+    onChange?.({ selectVal: val, ...newValue });
   };
   return (
     <div style={{ display: 'flex' }} id={id}>
@@ -93,9 +79,8 @@ export default (props: any) => {
           style={{ width: '170px' }}
           disabledDate={disabledDate}
           showToday={false}
-          status={dateState.state}
           allowClear={false}
-          value={dayjs(endDate, picker === 'quarter' ? 'YYYY-Q' : format)}
+          value={dateValue.date}
           onChange={onDateChange}
         />
       </div>

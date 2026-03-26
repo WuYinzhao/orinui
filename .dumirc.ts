@@ -35,7 +35,7 @@ export default defineConfig({
               title: 'DateRangePicker 日期范围',
               link: '/components/date-range',
             },
-            { title: 'EndDate 结束日期', link: '/components/end-date' },
+            { title: 'SingleDate 结束日期', link: '/components/single-date' },
             {
               title: 'ExcelHandle Excel 解析',
               link: '/components/excel-handle',

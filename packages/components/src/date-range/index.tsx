@@ -20,7 +20,7 @@ const selectOptions: { value: string; label: string }[] = [
   { value: 'establish', label: '成立以来' },
 ];
 
-function DateRangePicker(props: DateRangeProps) {
+export default (props: DateRangeProps) => {
   const {
     id,
     value,
@@ -153,6 +153,4 @@ function DateRangePicker(props: DateRangeProps) {
       </div>
     </div>
   );
-}
-
-export default DateRangePicker;
+};

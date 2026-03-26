@@ -16,7 +16,7 @@
 
 - [DatePicker 日期选择](/components/date-picker)
 - [DateRangePicker 日期范围](/components/date-range)
-- [EndDate 结束日期](/components/end-date)
+- [SingleDate 结束日期](/components/single-date)
 - [ExcelHandle Excel 解析](/components/excel-handle)
 - [CustomSelect 树形选择](/components/tree-select)
 
