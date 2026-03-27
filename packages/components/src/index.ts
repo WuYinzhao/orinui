@@ -1,6 +1,7 @@
 export { default as CustomSelect } from './TreeSelect';
 export { default as Chart } from './chart';
 export { default as ChartTooltip } from './chart/chartTooltip';
+export { default as CollapsePanel } from './collapse-panel';
 export { default as ComplexTree } from './complex-tree';
 export { default as DateRangePicker } from './date-range';
 export { default as DateRangeUtils } from './date-range/utils';

@@ -4,7 +4,7 @@ nav:
   title: 组件
   order: 10
 group:
-  title: 其他
+  title: 布局
   order: 4
 toc: content
 ---

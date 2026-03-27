@@ -2,7 +2,6 @@ import { SearchOutlined } from '@ant-design/icons';
 import { Input } from 'antd';
 import { cloneDeep, isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
-import outdent from '../assets/images/outdent.svg';
 import BaseTree from './baseTree';
 import './index.less';
 import { DivIcon, Open, Packup } from './styled';
@@ -19,12 +18,10 @@ treeData  data数据
 title prohibitSubordinates是多选（父子不关联）
 */
 export default (props: any) => {
-  const [collapsed, setCollapsed] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [treeList, setTreeList] = useState([]);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const {
-    width = 280,
     treeData,
     checkedKeys,
     describeTips = 'Ctrl+选中：全选所有子节点',
@@ -98,29 +95,10 @@ export default (props: any) => {
   };
 
   return (
-    <div
-      id="complex-tree"
-      className={collapsed ? 'complex-tree-shrink' : ''}
-      style={{
-        width: `${width}px`,
-        minWidth: `${width}px`,
-        maxWidth: `${width}px`,
-        flex: `0 0 ${width}px`,
-        height: '100%',
-      }}
-    >
-      <div className="collapsed" onClick={() => setCollapsed(!collapsed)}>
-        <img
-          src={outdent}
-          style={{
-            transform: collapsed ? 'rotate(180deg)' : '',
-          }}
-          alt=""
-        />
-      </div>
+    <div style={{ height: '100%', width: '100%' }}>
       <div
         style={{
-          display: collapsed ? 'none' : switcherIcon ? 'block' : 'none',
+          display: switcherIcon ? 'block' : 'none',
           marginBottom: '8px',
         }}
       >
@@ -141,7 +119,7 @@ export default (props: any) => {
       </div>
       <div
         style={{
-          display: collapsed ? 'none' : toggleData.length ? 'block' : 'none',
+          display: toggleData.length ? 'block' : 'none',
           marginBottom: '2px',
         }}
       >
@@ -165,16 +143,12 @@ export default (props: any) => {
             ))}
         </div>
       </div>
-      <div
-        style={{ display: collapsed ? 'none' : isCtrl ? 'block' : 'none' }}
-        className="isCtrlStr"
-      >
+      <div style={{ display: isCtrl ? 'block' : 'none' }} className="isCtrlStr">
         {describeTips}
       </div>
       <div
         style={{
-          display: collapsed ? 'none' : 'block',
-          height: `calc(100% - 88px - ${isCtrl ? '32px' : '0px'} - ${
+          height: `calc(100% - 60px - ${isCtrl ? '32px' : '0px'} - ${
             toggleData.length ? '30px' : '0px'
           })`,
           padding: '8px  0 0 12px',
