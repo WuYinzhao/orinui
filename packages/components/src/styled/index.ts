@@ -40,10 +40,11 @@ export const FormButton = styled.div`
 `;
 
 export const TableContent = styled.div`
-  width: 100%;
+  height: 100%;
   flex: 1;
   overflow: auto;
   background: #fff;
+  margin: 24px;
 `;
 
 export const EchartsContent = styled.div`
