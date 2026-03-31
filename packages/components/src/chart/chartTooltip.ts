@@ -1,9 +1,9 @@
-type CreateTooltipOptions = {
-  unit?: string;
-  precision?: number;
-};
+import type { CreateTooltipOptions, EChartsTooltipRow } from './type';
 
-export const tooltipFormate = (params: any, options?: CreateTooltipOptions) => {
+export const tooltipFormate = (
+  params: EChartsTooltipRow | EChartsTooltipRow[],
+  options?: CreateTooltipOptions,
+) => {
   let result = '';
   if (Array.isArray(params)) {
     result = createArrayTooltipFormatter(params, options);
@@ -11,13 +11,13 @@ export const tooltipFormate = (params: any, options?: CreateTooltipOptions) => {
   return result;
 };
 
-export const createArrayTooltipFormatter = <T>(
-  params: T[],
+export const createArrayTooltipFormatter = (
+  params: EChartsTooltipRow[],
   options: CreateTooltipOptions = {},
   tittle = true,
 ): string => {
   let result = '';
-  params.forEach(function (item: any, index) {
+  params.forEach(function (item: EChartsTooltipRow, index) {
     const {
       marker,
       seriesName,
@@ -49,9 +49,14 @@ export const createArrayTooltipFormatter = <T>(
     if (itemUnit) {
       unit = itemUnit;
     }
-    const data = Array.isArray(itemData) ? itemData[seriesIndex + 1] : itemData;
+    const idx = seriesIndex ?? 0;
+    const data = Array.isArray(itemData) ? itemData[idx + 1] : itemData;
     result += createToolTipInner(
-      { marker, name: seriesName, value: data },
+      {
+        marker: String(marker ?? ''),
+        name: String(seriesName ?? ''),
+        value: data as string | number,
+      },
       { ...options, unit },
     );
   });
@@ -59,11 +64,16 @@ export const createArrayTooltipFormatter = <T>(
   return result;
 };
 export const createToolTipInner = (
-  params: { marker: any; name: string; value: any },
+  params: { marker: string; name: string; value: string | number },
   options?: CreateTooltipOptions,
 ) => {
   const { marker, name, value } = params;
-  if (!value || isNaN(value)) {
+  if (
+    value === '' ||
+    value === null ||
+    value === undefined ||
+    isNaN(Number(value))
+  ) {
     return '';
   }
   const { unit = '' } = options || {};

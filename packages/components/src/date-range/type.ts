@@ -1,6 +1,9 @@
 import type { DatePickerProps } from 'antd';
-import type { Dayjs } from 'dayjs';
+import type { Dayjs, ManipulateType } from 'dayjs';
 export type { Dayjs } from 'dayjs';
+
+/** `assignDateValidate` 中 `timeDifference`：`[差值, dayjs.diff 单位]` */
+export type DateRangeTimeDifference = [number, ManipulateType];
 
 export type DateRangeType = [Dayjs, Dayjs];
 export interface DateRangeValue {

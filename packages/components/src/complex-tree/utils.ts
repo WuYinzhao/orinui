@@ -1,15 +1,20 @@
+import type { ComplexTreeNode, TreeKeyNode } from './type';
+
 /** 获取treeName
  *  list 为整个数组
  *  val为当前item得key
  */
-export const getTreeName = (list: any, val: any) => {
+export const getTreeName = (
+  list: ComplexTreeNode[],
+  val: string,
+): ComplexTreeNode | undefined => {
   for (let i = 0; i < list.length; i++) {
     const a = list[i];
     if (a.key === val) {
       return a;
     } else {
       if (a.children && a.children?.length > 0) {
-        const res: any = getTreeName(a.children, val);
+        const res = getTreeName(a.children, val);
         if (res) {
           return res;
         }
@@ -19,29 +24,31 @@ export const getTreeName = (list: any, val: any) => {
 };
 
 // 过滤
-export const getArrDifference = (arr1: any, arr2: any) => {
-  return arr1.concat(arr2).filter(function (v: any, i: any, arr: any) {
+export const getArrDifference = <T>(arr1: T[], arr2: T[]) => {
+  return arr1.concat(arr2).filter(function (v, i, arr) {
     return arr.indexOf(v) === arr.lastIndexOf(v);
   });
 };
 
 /** 过滤函数 */
-export const filterFn = (data: any, filterText: any) => {
+export const filterFn = (data: ComplexTreeNode, filterText: string) => {
   if (!filterText) {
     return true;
   }
   return new RegExp(filterText, 'i').test(data.name); //我是一title过滤 ，你可以根据自己需求改动
 };
 /** 获取展开的key值 */
-export const expandedKeyArr = (val: any, method: any, data: any) => {
+export const expandedKeyArr = <T>(
+  val: T[],
+  method: '' | ((v: T[], data: unknown) => T[]),
+  data: unknown,
+) => {
   //  val 数据
   //  method 方法
-  let originalArray = method !== '' ? method(val, data) : val;
-  let uniqueArray = originalArray.filter(
-    (item: any, index: any, array: any) => {
-      return array.indexOf(item) === index;
-    },
-  );
+  const originalArray = method === '' ? val : method(val, data);
+  const uniqueArray = originalArray.filter((item, index, array) => {
+    return array.indexOf(item) === index;
+  });
   return uniqueArray;
 };
 
@@ -49,8 +56,8 @@ export const expandedKeyArr = (val: any, method: any, data: any) => {
  *  data 为全部数据
  *  dataExpan 接受得空数组
  */
-export const getFirstLevelKeys = (data: any): string[] => {
-  const keys = [];
+export const getFirstLevelKeys = (data: ComplexTreeNode[]): string[] => {
+  const keys: string[] = [];
   if (Array.isArray(data) && data.length > 0) {
     const first = data[0];
     keys.push(first.key);
@@ -66,32 +73,35 @@ export const getFirstLevelKeys = (data: any): string[] => {
 };
 /** 根据树形结构获取全部key */
 export const getAllKeysForTreeData = (
-  data: any,
-  disbaleFun?: (item: any) => boolean,
+  data: TreeKeyNode[],
+  disbaleFun?: (item: ComplexTreeNode | undefined) => boolean,
 ): string[] => {
   const keys: string[] = [];
-  for (let i in data) {
-    if (Object.prototype.hasOwnProperty.call(data, i)) {
-      if (!disbaleFun || !disbaleFun(data[i].data)) {
-        keys.push(data[i].key);
-      }
-      if (data[i].children) {
-        //如果有children层，则继续遍历
-        keys.push(...getAllKeysForTreeData(data[i].children, disbaleFun));
-      }
+  for (let i = 0; i < data.length; i++) {
+    const row = data[i];
+    if (!disbaleFun || !disbaleFun(row.data)) {
+      keys.push(row.key);
+    }
+    if (row.children) {
+      //如果有children层，则继续遍历
+      keys.push(...getAllKeysForTreeData(row.children, disbaleFun));
     }
   }
   return keys;
 };
 
 /** 搜索处理方法 */
-export const arrayTreeFilter = (data: any, predicate: any, filterText: any) => {
+export const arrayTreeFilter = (
+  data: ComplexTreeNode[] | undefined,
+  predicate: (node: ComplexTreeNode, filterText: string) => boolean,
+  filterText: string,
+): ComplexTreeNode[] | undefined => {
   const nodes = data;
   // 如果已经没有节点了，结束递归
   if (!(nodes && nodes.length)) {
     return;
   }
-  const newChildren = [];
+  const newChildren: ComplexTreeNode[] = [];
   for (const node of nodes) {
     if (predicate(node, filterText)) {
       // 如果自己（节点）符合条件，直接加入到新的节点集
@@ -115,13 +125,13 @@ export const arrayTreeFilter = (data: any, predicate: any, filterText: any) => {
 };
 
 /** 搜索展开 key函数 */
-export const expandedKeysFun = (treeData: any) => {
+export const expandedKeysFun = (treeData: ComplexTreeNode[]) => {
   if (treeData && treeData.length === 0) {
     return [];
   }
-  let arr: any[] = [];
-  const expandedKeysFn = (treeData: any) => {
-    treeData.forEach((item: any) => {
+  const arr: string[] = [];
+  const expandedKeysFn = (nodes: ComplexTreeNode[]) => {
+    nodes.forEach((item) => {
       arr.push(item.key);
       if (item.children && item.children?.length > 0) {
         expandedKeysFn(item.children);
@@ -142,7 +152,10 @@ export const macSystem = () => {
  * @param {string} targetKey 目标节点key
  * @returns {Array} 路径节点数组（从根到目标节点），未找到返回[]
  */
-export const findParentKeys = (tree: any[], targetKey: string): string[] => {
+export const findParentKeys = (
+  tree: ComplexTreeNode[],
+  targetKey: string,
+): string[] => {
   for (const node of tree) {
     if (node.key === targetKey) return [targetKey]; // 找到目标节点
     if (node.children) {

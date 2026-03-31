@@ -1,7 +1,10 @@
 import { Tree } from 'antd';
+import type { DataNode } from 'antd/es/tree';
 import { isEmpty } from 'lodash';
+import type { Key } from 'react';
 import { useState } from 'react';
 import './index.less';
+import type { SingleTreeProps } from './type';
 
 /*
 props父组件传值
@@ -13,7 +16,7 @@ onSelectKeys 事件名称
 size  大小
 showSwitcher  是否显示展开收起按钮
 */
-export default (props: any) => {
+export default (props: SingleTreeProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const {
     treeData,
@@ -23,7 +26,7 @@ export default (props: any) => {
     size = 'large',
     showSwitcher = false,
   } = props;
-  const onSelect = (key: any, e: any) => {
+  const onSelect = (key: Key[], e: { node: DataNode }) => {
     if (isEmpty(key)) return;
     onSelectKeys && onSelectKeys(key[0], e.node);
   };
@@ -45,7 +48,7 @@ export default (props: any) => {
           defaultExpandAll
           fieldNames={{ title: 'name', key: 'id', children: 'children' }}
           treeData={treeData}
-          selectedKeys={[selectedKeys]}
+          selectedKeys={selectedKeys !== null ? [selectedKeys as Key] : []}
           onSelect={onSelect}
         ></Tree>
       )}

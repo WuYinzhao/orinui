@@ -1,18 +1,20 @@
 import ReactEcharts from 'echarts-for-react';
 import React, { forwardRef, useEffect, useRef } from 'react';
-const Chart: React.FC<any> = (props: any) => {
+import type { ChartProps, EChartsReactRef } from './type';
+
+const Chart = (props: ChartProps) => {
   const {
     optionDefault,
     optionChange,
     style = { width: '100%', height: '100%' },
-    onEvents = [],
+    onEvents = {},
     registerEvents = {},
     notMerge = false,
     lazyUpdate = false,
     renderWithSVG = false,
   } = props;
 
-  const chartRef = useRef<any>(null);
+  const chartRef = useRef<EChartsReactRef | null>(null);
 
   useEffect(() => {
     if (optionChange && Object.keys(optionChange).length > 0) {
@@ -50,4 +52,6 @@ const Chart: React.FC<any> = (props: any) => {
   );
 };
 
-export default forwardRef(Chart as any);
+export default forwardRef(
+  Chart as React.ForwardRefRenderFunction<EChartsReactRef, ChartProps>,
+);

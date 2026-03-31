@@ -1,8 +1,9 @@
 import { TreeSelect } from 'antd';
 import { useMemo, useState } from 'react';
 import TreeRender from './treeRender';
+import type { CustomSelectProps } from './type';
 
-export default (props: any) => {
+export default (props: CustomSelectProps) => {
   const {
     treeData = [],
     value = [],
@@ -18,8 +19,13 @@ export default (props: any) => {
   }, [treeData, value]);
 
   const onCheckAll = (checked: boolean) => {
-    onChange(
-      checked ? treeData.map((item: any) => item[fieldNames.value]) : [],
+    onChange?.(
+      checked
+        ? (treeData.map(
+            (item) =>
+              (item as Record<string, unknown>)[fieldNames.value as string],
+          ) as string[])
+        : [],
     );
   };
 
@@ -30,7 +36,7 @@ export default (props: any) => {
       treeData={treeData}
       open={true}
       onChange={(value) => {
-        onChange(value);
+        onChange?.(value as string[]);
       }}
       onSearch={(value) => {
         setSearchValue(value);

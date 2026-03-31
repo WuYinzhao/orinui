@@ -1,6 +1,6 @@
 import dayjs, { Dayjs } from 'dayjs';
 import { isEmpty } from 'lodash';
-import { DateRangeType } from './type';
+import type { DateRangeTimeDifference, DateRangeType } from './type';
 export type DateUnitTYpe = 'days' | 'months' | 'years';
 export const getPastDayOfSomeDay = (param: {
   someDay: Dayjs; //开始日期
@@ -31,18 +31,18 @@ export const getBeginDate = (
   return beginDate.isBefore(minDateDayjs) ? minDateDayjs : beginDate;
 };
 
-export const getOption = (options = [], key: string) => {
-  return options.find((item: any) => item.value === key);
+export const getOption = (options: { value: string }[] = [], key: string) => {
+  return options.find((item) => item.value === key);
 };
 export const assignDateValidate = (
   date: [Dayjs, Dayjs],
-  timeDifference?: any,
+  timeDifference?: DateRangeTimeDifference,
   timeDifferenceError?: string,
 ) => {
   const [beginDate, endDate] = date;
   if (beginDate && endDate) {
     const state = beginDate.isBefore(endDate) || beginDate.isSame(endDate);
-    if (!isEmpty(timeDifference)) {
+    if (!isEmpty(timeDifference) && timeDifference) {
       const [num, type] = timeDifference;
       const timeDifferenceState = endDate.diff(beginDate, type) < num;
       if (!timeDifferenceState) {

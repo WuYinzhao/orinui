@@ -1,14 +1,20 @@
 import { Table } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import { useEffect, useMemo, useState } from 'react';
 import { VList } from 'virtuallist-antd';
 import './index.less';
+import type { VirtualTableProps } from './type';
+
 //  获取有几级表头
-const calculateDepth = (arr: any, depth = 0) => {
+const calculateDepth = (
+  arr: ColumnsType<Record<string, unknown>> | undefined,
+  depth = 0,
+) => {
   let maxDepth = depth;
   if (arr !== null && arr !== undefined) {
     for (let i = 0; i < arr.length; i++) {
       const obj = arr[i];
-      if (obj.children && obj.children.length > 0) {
+      if ('children' in obj && obj.children && obj.children.length > 0) {
         const childDepth = calculateDepth(obj.children, depth + 1);
         maxDepth = Math.max(maxDepth, childDepth);
       }
@@ -22,7 +28,7 @@ const calculateDepth = (arr: any, depth = 0) => {
  * lineHeight 表头行高
  * paddingNum=表格上下的边距24*2
  */
-export default (props: any) => {
+export default (props: VirtualTableProps<Record<string, unknown>>) => {
   const {
     size = 'middle',
     bordered = true,

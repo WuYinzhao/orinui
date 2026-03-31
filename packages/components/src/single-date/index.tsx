@@ -11,6 +11,7 @@ dayjs.extend(localeData);
 dayjs.extend(quarterOfYear);
 dayjs.extend(advancedFormat);
 
+import type { Dayjs } from 'dayjs';
 import { DateRangeProps } from './type';
 import {
   getHalfYearDay,
@@ -46,11 +47,12 @@ export default (props: DateRangeProps) => {
   useEffect(() => {
     setDateDisabled(selectVal !== 'custom');
   }, [selectVal]);
-  const onDateChange = (val: any) => {
+  const onDateChange = (val: Dayjs | null) => {
+    if (!val) return;
     const date = val.endOf(picker);
     onChange?.({ date: date, dateStr: date.format(format), selectVal });
   };
-  const onSelectChange = (val: any) => {
+  const onSelectChange = (val: string) => {
     let newValue = dateValue;
     if (val === '1') {
       // 获取上季末

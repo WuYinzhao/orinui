@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import outdent from '../assets/images/outdent.svg';
 import './index.less';
+import type { CollapsePanelProps } from './type';
 /*
 props父组件传值
 width：左侧菜单宽度
 treeData  data数据
 title prohibitSubordinates是多选（父子不关联）
 */
-export default (props: any) => {
+export default (props: CollapsePanelProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const { width = 280, children } = props;
 

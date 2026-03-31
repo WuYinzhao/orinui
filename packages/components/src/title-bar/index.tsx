@@ -1,9 +1,10 @@
 import { SingleHeader } from './styled';
+import type { TitleBarProps } from './type';
 /*
 tableTitle 表格TITLE
 operateContent 操作功能
 */
-const SecondHeader = (props: any) => {
+const SecondHeader = (props: TitleBarProps) => {
   const {
     leftContent,
     rightContent,

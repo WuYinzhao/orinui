@@ -1,10 +1,16 @@
 import { SearchOutlined } from '@ant-design/icons';
 import { Input } from 'antd';
 import { cloneDeep, isEmpty } from 'lodash';
+import type { ChangeEvent, Key } from 'react';
 import { useEffect, useState } from 'react';
 import BaseTree from './baseTree';
 import './index.less';
 import { DivIcon, Open, Packup } from './styled';
+import type {
+  ComplexTreeNode,
+  ComplexTreeProps,
+  ComplexTreeToggleItem,
+} from './type';
 import {
   arrayTreeFilter,
   filterFn,
@@ -17,10 +23,10 @@ width：左侧菜单宽度
 treeData  data数据
 title prohibitSubordinates是多选（父子不关联）
 */
-export default (props: any) => {
+export default (props: ComplexTreeProps) => {
   const [searchValue, setSearchValue] = useState('');
-  const [treeList, setTreeList] = useState([]);
-  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [treeList, setTreeList] = useState<ComplexTreeNode[]>([]);
+  const [expandedKeys, setExpandedKeys] = useState<Key[]>([]);
   const {
     treeData,
     checkedKeys,
@@ -47,7 +53,7 @@ export default (props: any) => {
   }, [treeData]);
 
   //切换树
-  const onChangeToggle = (val: any) => {
+  const onChangeToggle = (val: string) => {
     onClickToggle && onClickToggle(val);
   };
 
@@ -63,33 +69,33 @@ export default (props: any) => {
   };
 
   // 单个展开
-  const onExpand = (val: any) => {
+  const onExpand = (val: Key[]) => {
     if (isEmpty(val)) return;
     setExpandedKeys(val);
   };
 
   // 通过筛选获取需要展示的treeData
-  const getTreeDataForSearch = (val: any) => {
+  const getTreeDataForSearch = (val: string) => {
     const treeList = cloneDeep(treeData);
     if (val === '') {
       return treeList;
     } else {
-      return arrayTreeFilter(treeList, filterFn, val);
+      return arrayTreeFilter(treeList, filterFn, val) ?? [];
     }
   };
 
   // 搜索
-  const onChangeSearch = (e: any) => {
+  const onChangeSearch = (e: ChangeEvent<HTMLInputElement>) => {
     if (isEmpty(e.target)) return;
     let value = e.target.value;
     setSearchValue(value);
-    const result: any = getTreeDataForSearch(value);
+    const result = getTreeDataForSearch(value);
     setTreeList(result);
     if (value === '') {
       const expKeys = getFirstLevelKeys(result);
       setExpandedKeys(expKeys);
     } else {
-      const expKeys: any = getAllKeysForTreeData(result);
+      const expKeys = getAllKeysForTreeData(result);
       setExpandedKeys(expKeys);
     }
   };
@@ -125,7 +131,7 @@ export default (props: any) => {
       >
         <div className="toggle-container">
           {toggleData.length &&
-            toggleData.map((item: any) => (
+            toggleData.map((item: ComplexTreeToggleItem) => (
               <span
                 onClick={() => {
                   onChangeToggle(item.value);

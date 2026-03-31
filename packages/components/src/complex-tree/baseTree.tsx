@@ -1,11 +1,17 @@
 import { Tree } from 'antd';
 import _ from 'lodash';
 import { useEffect, useRef } from 'react';
+import type {
+  BaseTreeProps,
+  ComplexTreeNode,
+  TreeCheckInfo,
+  TreeKeyNode,
+} from './type';
 import { findParentKeys, getAllKeysForTreeData, macSystem } from './utils';
 const { TreeNode } = Tree;
 
 const isMac = macSystem();
-export default (props: any) => {
+export default (props: BaseTreeProps) => {
   const {
     searchValue = '',
     treeList,
@@ -55,7 +61,7 @@ export default (props: any) => {
     ctrlRef.current = false;
   };
 
-  const getItemDisabled = (item: any): boolean | undefined => {
+  const getItemDisabled = (item: ComplexTreeNode): boolean | undefined => {
     // 满足项返回数据为禁用，或者有在前端逻辑内禁用 两个条件均满足其一则使节点处于禁用状态
     return item.disabled || (disabledItemFunc ? disabledItemFunc(item) : false);
   };
@@ -74,18 +80,23 @@ export default (props: any) => {
   };
 
   // 点击选中
-  const onCheck = (val: any, e: any) => {
+  const onCheck = (_val: unknown, e: TreeCheckInfo) => {
     const { checked, node } = e;
-    let currentClickedKeys = [];
+    let currentClickedKeys: string[] = [];
     // 当前节点为点击选中状态时或者为多选节点时，需要获取到当前节点点击后影响的所有key
     if (checked || multiple_check) {
       //选中时  父子不关联或者没有按下ctrl时为单选
       if (checkStrictly && !ctrlRef.current) {
-        currentClickedKeys.push(node.key);
+        currentClickedKeys.push(String(node.key));
       } else {
-        currentClickedKeys = getAllKeysForTreeData([node], getItemDisabled);
+        currentClickedKeys = getAllKeysForTreeData(
+          [node as TreeKeyNode],
+          (item) => Boolean(item && getItemDisabled(item)),
+        );
         if (!checked) {
-          currentClickedKeys.push(...findParentKeys(treeList, node.key));
+          currentClickedKeys.push(
+            ...findParentKeys(treeList, String(node.key)),
+          );
         }
       }
     }
@@ -98,12 +109,15 @@ export default (props: any) => {
     }
   };
   // 处理树
-  const renderTreeNode = (data: any, disabled = false) => {
+  const renderTreeNode = (
+    data: ComplexTreeNode[] | undefined,
+    disabled = false,
+  ) => {
     //生成树结构函数
-    if (data.length === 0) {
+    if (!data || data.length === 0) {
       return;
     }
-    return data.map((item: any) => {
+    return data.map((item) => {
       const index = item.name.indexOf(searchValue);
       const beforeStr = item.name.substr(0, index);
       const afterStr = item.name.substr(index + searchValue.length);
@@ -119,7 +133,8 @@ export default (props: any) => {
         );
       if (item.children && item.children?.length > 0) {
         const childDisabled =
-          disableChildren && (disabled || checkedKeys.includes(item.key));
+          disableChildren &&
+          (disabled || (checkedKeys ?? []).includes(item.key));
         return (
           <TreeNode
             key={item.key}
