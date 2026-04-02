@@ -104,6 +104,48 @@ export const mergeFieldsOnTree = (
 };
 
 /**
+ * 递归查找树形数组中的第一个叶子节点
+ * @param {Array} treeArray - 树形结构数组
+ * @param {string} childrenKey - 子节点数组的键名，默认为'children'
+ * @returns {Object|null} 找到的第一个叶子节点，没有找到则返回null
+ */
+export const findFirstLeafNodeInArray: any = (
+  treeArray: any[],
+  childrenKey = 'children',
+) => {
+  // 检查参数有效性
+  if (!Array.isArray(treeArray) || treeArray.length === 0) {
+    return null;
+  }
+
+  // 遍历数组中的每个节点
+  for (const node of treeArray) {
+    if (typeof node !== 'object' || node === null) {
+      continue;
+    }
+
+    // 检查当前节点是否有子节点
+    const hasChildren =
+      node[childrenKey] &&
+      Array.isArray(node[childrenKey]) &&
+      node[childrenKey].length > 0;
+
+    // 如果是叶子节点，直接返回
+    if (!hasChildren) {
+      return node;
+    }
+
+    // 如果不是叶子节点，递归检查其子节点
+    const leafNode = findFirstLeafNodeInArray(node[childrenKey], childrenKey);
+    if (leafNode) {
+      return leafNode;
+    }
+  }
+  // 遍历完所有节点都没有找到叶子节点
+  return null;
+};
+
+/**
  * 递归遍历树形数组并根据条件函数设置disabled属性
  */
 export const setDisabledByCondition = (

@@ -18,8 +18,8 @@ export const FormContent = styled.div`
 `;
 
 export const ButtonPlaceholder = styled.div`
-  width: 160px;
   height: 32px;
+  margin-bottom: 16px;
 `;
 
 export const ButtonGroup = styled.div`

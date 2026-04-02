@@ -13,6 +13,7 @@ import { screenShotImage } from './screenshot';
 import {
   DataProcess,
   deepAddField,
+  findFirstLeafNodeInArray,
   getRowSpan,
   mergeFieldsOnTree,
   setDisabledByCondition,
@@ -23,6 +24,7 @@ export {
   DataProcess,
   deepAddField,
   divide,
+  findFirstLeafNodeInArray,
   formateDateRange,
   formatTableData,
   formatToThousandsRounded,
@@ -56,6 +58,7 @@ export default {
   mergeFieldsOnTree,
   getFirstOrDefault,
   setDisabledByCondition,
+  findFirstLeafNodeInArray,
   formatTableData,
   handleData,
   roundToDecimalPlaces,

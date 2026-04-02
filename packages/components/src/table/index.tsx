@@ -36,13 +36,12 @@ export default (props: VirtualTableProps<Record<string, unknown>>) => {
     rowKey = 'id',
     id = 'independent',
     height,
-    isScroll = true,
     columns,
     dataSource,
     isVirtualTable,
     virtualId = 'virtualTableid',
     lineHeight = 40,
-    paddingNum = 48,
+    paddingNum = 0,
   } = props;
 
   const paginationHieght = pagination ? 60 : 0;
