@@ -41,5 +41,9 @@
     "typescript": "^5.4.0",
     "vite": "^7.3.0",
     "vite-plugin-dts": "^4.5.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }
