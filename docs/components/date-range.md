@@ -39,7 +39,7 @@ tips:默认最小日期为 2002 年 1 月 1 日，在选择成立以来选项时
 
 tips:默认为明日不可选择
 
-<code src="./demos/date-range/custom-min-date.tsx"></code>
+<code src="./demos/date-range/disable-date.tsx"></code>
 
 ### DateRangeUtils
 
