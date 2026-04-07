@@ -115,7 +115,7 @@ export const getMonthInitValue = (
   const endDateInit = dayjs(dayjs().subtract(forward, 'M')).endOf('M');
   const startDateInit = dayjs(dayjs().subtract(forward, 'M')).startOf('M');
   return {
-    data: [startDateInit, endDateInit],
+    date: [startDateInit, endDateInit],
     dateStr: [startDateInit.format(format), endDateInit.format(format)],
   };
 };
