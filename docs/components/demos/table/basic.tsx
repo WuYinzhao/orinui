@@ -2,8 +2,8 @@ import { Table } from '@orinui/components';
 import { Card } from 'antd';
 
 const columns = [
-  { title: '名称', dataIndex: 'name', key: 'name' },
-  { title: '数值', dataIndex: 'value', key: 'value' },
+  { title: '名称', dataIndex: 'name', key: 'name', width: 150 },
+  { title: '数值', dataIndex: 'value', key: 'value', width: 150 },
 ];
 
 const dataSource = [
@@ -18,8 +18,8 @@ export default () => {
       <Table
         rowKey="id"
         columns={columns}
-        dataSource={dataSource}
-        height={280}
+        dataSource={[]}
+        height={300}
         pagination={false}
       />
     </Card>

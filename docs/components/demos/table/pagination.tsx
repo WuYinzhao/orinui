@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 
 const columns = [
   { title: '序号', dataIndex: 'index', key: 'index', width: 72 },
-  { title: '名称', dataIndex: 'name', key: 'name' },
+  { title: '名称', dataIndex: 'name', key: 'name', width: 72 },
   { title: '数值', dataIndex: 'value', key: 'value', width: 120 },
 ];
 

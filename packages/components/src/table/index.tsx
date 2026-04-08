@@ -32,7 +32,7 @@ const calculateDepth = (
 export default (props: VirtualTableProps<Record<string, unknown>>) => {
   const {
     size = 'middle',
-    bordered = true,
+    bordered = false,
     pagination = false,
     rowKey = 'id',
     height,
@@ -48,6 +48,7 @@ export default (props: VirtualTableProps<Record<string, unknown>>) => {
     components: componentsFromProps,
     className,
     style,
+
     ...rest
   } = props;
 
@@ -69,7 +70,8 @@ export default (props: VirtualTableProps<Record<string, unknown>>) => {
       let num = 0;
       const depth = calculateDepth(columns);
       if (columns) {
-        num += (depth + 1) * singleHeaderHeight;
+        // 加上1px的边框
+        num += (depth + 1) * (singleHeaderHeight + 1);
       }
       setHeaderHeight(num);
     });
@@ -92,13 +94,6 @@ export default (props: VirtualTableProps<Record<string, unknown>>) => {
         ? scrollFromProps.y
         : scrollYNumber;
 
-    if (!virtual) {
-      return {
-        ...scrollFromProps,
-        y,
-      };
-    }
-
     const hasExplicitX =
       scrollFromProps !== undefined &&
       scrollFromProps !== null &&
@@ -111,12 +106,25 @@ export default (props: VirtualTableProps<Record<string, unknown>>) => {
       x = (w > 0 ? w : 'max-content') as typeof x;
     }
 
+    if (!virtual) {
+      if (dataSource?.length === 0) {
+        // 没有数据时，不传递scroll，解决antd5表格没有数据时，且column中包含width时的宽度塌陷问题
+        return {
+          x,
+        };
+      }
+      // return {
+      //   ...scrollFromProps,
+      //   y,
+      // };
+    }
+
     return {
       ...scrollFromProps,
       x,
       y,
     };
-  }, [scrollFromProps, scrollYNumber, virtual, columns]);
+  }, [scrollFromProps, scrollYNumber, virtual, columns, dataSource]);
 
   return (
     <Table

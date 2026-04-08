@@ -16,7 +16,6 @@
 .custom-table.ant-table-wrapper {
   // 纵向滚动条：标准表（.ant-table-body）
   .ant-table-body {
-    border-bottom: 1px solid #f0f0f0;
     .scrollbar();
   }
 
@@ -54,7 +53,7 @@
     background: #f0f3f7;
     border-right: 1px solid #fff;
     border-inline-end: 1px solid #fff !important;
-    border-bottom: 1px solid #fff;
+    border-bottom: 1px solid #fff !important;
     box-sizing: border-box;
     color: #04042c;
     font-family: SourceHanSansCN-Medium, sans-serif;
@@ -68,6 +67,10 @@
     &::before {
       display: none !important;
     }
+  }
+
+  .ant-table-placeholder > .ant-table-cell {
+    padding: 12px 8px !important;
   }
 
   // 普通表体：行高由 --orinui-table-body-row-height 驱动
