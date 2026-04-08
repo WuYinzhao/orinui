@@ -1,0 +1,61 @@
+# orinui — LLM 文档索引（llms.txt）
+
+## 关于本文件
+
+- **主索引**：仓库根目录的 **`llms.txt`**（与 [llmstxt.org](https://llmstxt.org/) 及 [Ant Design llms.txt](https://ant.design/llms.txt) 惯例一致），内含简介、Navigation 与文档链接表，便于 Agent「先索引再深读」。同一内容会同步到 **`public/llms.txt`**，供 dumi 文档站在浏览器中通过 `/llms.txt` 访问。
+- **全文聚合（可选）**：**`llms-full.txt`**（由 `pnpm run generate:llm` 生成，可用 `--no-full` 跳过），根目录与 **`public/llms-full.txt`** 同步，浏览器路径为 `/llms-full.txt`；按文档站侧栏顺序拼接各页正文，适合长上下文；体积较大。
+- **维护**：文档或 `.dumirc.ts` 侧栏变更后，运行 `pnpm run generate:llm` 刷新上述文件（含 `public/`）。
+
+## 简介
+
+**orinui** 是基于 **React 18** 与 **Ant Design 5** 的业务组件库 monorepo，对外提供 **`@orinui/components`**（主组件）、**`@orinui/hooks`**、**`@orinui/utils`**、**`@orinui/ai-skills`** 等包，用于表格、图表、树、日期与表单布局等场景。源码与文档使用 **dumi** 组织；组件包使用 **Vite** 构建并在消费方与 **react / antd / dayjs** 等一同使用。
+
+## 安装
+
+在业务项目中使用 **pnpm**（推荐）、yarn 或 npm 安装所需包，例如：
+
+```bash
+pnpm add @orinui/components @orinui/hooks @orinui/utils
+```
+
+按需只装其中一部分即可；版本号以各包在 registry 上的发布说明为准。
+
+## Peer 依赖与运行时依赖（消费方）
+
+组件库构建将 **react**、**react-dom**、**antd**、**dayjs**、**lodash**、**styled-components**、**echarts** 及相关包 **external**，由业务应用提供并打包，请保证版本与项目一致。
+
+| 依赖 | 说明 |
+| --- | --- |
+| `react`、`react-dom` | 建议 **>= 18**（与各包 `peerDependencies` 一致）。 |
+| `antd` | **5.x**（与仓库根目录及各包依赖范围一致）；orinui 组件在其 API 之上封装或扩展。 |
+| `styled-components` | 样式方案之一，按组件文档按需安装。 |
+| `dayjs` | 日期类组件与 antd 5 日期链路常用。 |
+| `echarts`、`echarts-for-react` | 使用 Chart 等图表组件时需要。 |
+| `lodash` | 部分组件或 utils 会用到。 |
+| `@ant-design/icons` | 若示例或业务中与 antd 图标共用。 |
+
+具体以各 npm 包的 **`package.json`** 的 `peerDependencies` / `dependencies` 及 **`packages/components/vite.config.ts`** 的 `external` 为准；新增依赖时请同步核对。
+
+## 基本用法
+
+```tsx
+import { Table } from '@orinui/components';
+import { ConfigProvider } from 'antd';
+import zhCN from 'antd/locale/zh_CN';
+
+export default function Page() {
+  return (
+    <ConfigProvider locale={zhCN}>
+      <Table columns={[]} dataSource={[]} height={400} />
+    </ConfigProvider>
+  );
+}
+```
+
+按组件文档引入样式（若有独立 CSS 入口，见各包说明，例如 `@orinui/components/index.css`）。
+
+## 与 Ant Design 5 的关系
+
+- orinui 组件面向 **antd 5** API（如 `Table`、`DatePicker`、`ConfigProvider`）；请勿与 antd 4 文档混用。
+- 多数组件是在 antd 5 能力上的**封装或扩展**（统一高度、滚动、表格区域布局等），具体行为以 **`docs/components/`** 各页为准。
+- 主题与 **ConfigProvider**、**Design Token** 等请按 antd 5 官方文档配置；注意样式加载顺序与 Less/CSS 入口与业务一致。

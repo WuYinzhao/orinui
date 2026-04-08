@@ -1,0 +1,1235 @@
+# orinui — 全文聚合（llms-full.txt）
+
+> 本文件由 `scripts/generate-llm-txt.mjs` 根据 `docs/` 与侧栏顺序拼接生成；请先读 [**llms.txt**](./llms.txt) 获取导航与链接索引。
+
+
+## 指南
+
+来源：`docs/guide.md`
+
+# 指南
+
+本页介绍如何在业务中接入 orinui，以及为 **AI 辅助编程工具**（Cursor、Copilot、本地 Agent 等）准备的 **`llms.txt` 文档索引**。
+
+## 面向 AI 与开发者的 `llms.txt`
+
+### 是什么、解决什么问题
+
+在业务项目里集成 `@orinui/components` 等包时，模型或助手往往需要同时知道：**怎么装依赖、peer 要求、如何 import、每个组件的文档在哪**。若只依赖仓库内零散路径或让模型「猜」API，容易产生版本混用（例如 antd 4/5）、漏装 peer、或读到过时说明。
+
+**`llms.txt`** 是放在**仓库根目录**的 Markdown 索引文件（命名与 [llmstxt.org](https://llmstxt.org/) 及 [Ant Design 的 llms.txt](https://ant.design/llms.txt) 惯例一致），专门为 **人类开发者 + LLM** 设计，用于：
+
+- **先索引、再深读**：上半部分固定说明安装、peer、最小用法、与 **Ant Design 5** 的关系；下半部分 **Navigation** 按文档站侧栏列出各页的**可抓取链接**（本地为 `docs/**/*.md` 相对路径，发布前可换为文档站绝对 URL）。
+- **与 dumi 文档同源**：内容由脚本根据 `docs/` 与 `.dumirc.ts` 侧栏生成，侧栏或文档变更后重新生成即可，避免与站点结构脱节。
+
+相关文件共 **两份**，由 `pnpm run generate:llm` 生成：
+
+| 文件 | 作用 |
+| --- | --- |
+| **`llms.txt`** | **主索引**（推荐优先提供给 AI 或放在上下文中）。 |
+| **`llms-full.txt`** | 可选：按侧栏顺序拼接各文档正文，并附「包导出附录」；体积大；可用 `node scripts/generate-llm-txt.mjs --no-full` 跳过生成。 |
+
+### 文件位置与浏览器访问（`public/`）
+
+生成脚本会写入**两处内容相同**的副本（勿手改 `public/` 内文件）：
+
+1. **仓库根目录**（`llms.txt`、`llms-full.txt`）：便于在编辑器、Git、工具链中直接打开，与常见「根目录 `llms.txt`」习惯一致。
+2. **`public/` 目录**：构建产物会把其中文件拷到站点根（如 `docs-dist/llms.txt`）。**本地 `pnpm dev` 时**，默认会把未知路径交给 SPA，直接访问 `/llms*.txt` 往往得到 **HTML 壳子**而非纯文本；项目在 **`.dumirc.ts`** 里用 `chainWebpack` 注入了 `setupMiddlewares`，对 `/llms.txt`、`/llms-full.txt` 优先返回 `public/` 中的 **`text/plain`**。修改该配置或首次生成 `public/` 后请**重启** `pnpm dev`。
+
+| 文件 | 在浏览器中打开 |
+| --- | --- |
+| 主索引 | <a href="/llms.txt" target="_blank" rel="noreferrer">llms.txt</a> |
+| 全文聚合 | <a href="/llms-full.txt" target="_blank" rel="noreferrer">llms-full.txt</a> |
+
+**可直接复制到地址栏或 AI IDE 的路径**（本地开发端口以终端为准，默认多为 `8000`）：
+
+- `http://localhost:8000/llms.txt`
+- `http://localhost:8000/llms-full.txt`
+
+正式部署后，将主机名换成你的文档站域名即可，例如 `https://你的域名/llms-full.txt`。
+
+在 **Cursor / IDE** 中也可直接打开仓库根目录下的 `llms.txt`、`llms-full.txt`；从 **`docs/`** 看仓库根为 `../llms.txt`、`../llms-full.txt`。
+
+若需 **`llms.txt` 内 Navigation** 使用可抓取的绝对 URL，可设置环境变量 **`ORINUI_LLMS_DOCS_ORIGIN`** 后执行 `pnpm run generate:llm`（见下文）。
+
+### 在仓库中的位置与更新方式
+
+- **输出位置**：每次生成会更新仓库根目录的 `llms.txt` / `llms-full.txt`，并**同步**到 `public/llms.txt`、`public/llms-full.txt`（供 `pnpm dev` / `pnpm run docs:build` 在浏览器中访问）。`pnpm run docs:build` 已内置先执行 `generate:llm`，避免构建站点时缺少静态文件。
+- **生成 / 刷新**（文档或 `.dumirc.ts` 侧栏有改动时执行）：
+
+```bash
+pnpm run generate:llm
+```
+
+脚本为 `scripts/generate-llm-txt.mjs`，静态说明模板为 `scripts/llm-header.txt`；**请勿手工编辑** `llms.txt` 中带 `AUTO-GENERATED` 标记的区块，**勿手工编辑** `public/` 下同名文件（均由脚本覆盖）。
+
+- **仅生成索引、不生成全文**（减小体积）：
+
+```bash
+node scripts/generate-llm-txt.mjs --no-full
+```
+
+- **发布文档站时**：若希望索引内链接可被公网 HTTP 抓取（便于 Cursor `@Docs`、爬虫等），设置环境变量 **`ORINUI_LLMS_DOCS_ORIGIN`** 为文档站 origin（无末尾斜杠），再运行上述命令，例如：
+
+```bash
+ORINUI_LLMS_DOCS_ORIGIN=https://your-docs.example.com pnpm run generate:llm
+```
+
+### 推荐给 AI 的使用方式
+
+1. **将 `llms.txt` 整段或前半部分（到 Navigation 之前）作为系统/项目上下文**，便于模型掌握安装与 antd 5 约束。
+2. **需要某一组件细节时**，按 Navigation 中的链接**再拉取**对应 `docs/components/*.md`（或线上同路径页面），而不是只依赖附录里的源码路径表。
+3. **`llms-full.txt`** 仅在需要「一次读多页」时使用；其中附录为各包 `index.ts` 导出与源码路径，**面向库维护/校验**，业务集成以组件文档为准。
+
+### 与本文档站的关系
+
+- 本 **指南**（当前页）面向人类读者，讲解概念与操作步骤。
+- **`llms.txt`** 更偏 **机器可消费的索引 + 稳定结构**（简介 → Navigation → 链接表）；二者互补：开发时以本站为主，给 AI 配上下文时以 `llms.txt` 为主。
+
+---
+
+## 快速接入（概要）
+
+更完整的安装、peer 与代码示例见仓库根目录 **`llms.txt`** 正文，或查阅各包 `package.json` 与组件文档。
+
+```bash
+pnpm add @orinui/components
+```
+
+业务侧需自行安装并对齐 **React 18+**、**antd 5.x**、以及组件实际用到的 **dayjs**、**styled-components**、**echarts** 等（与 `packages/components/vite.config.ts` 中 `external` 一致）。
+
+```tsx
+import { Table } from '@orinui/components';
+import { ConfigProvider } from 'antd';
+import zhCN from 'antd/locale/zh_CN';
+
+export default function Page() {
+  return (
+    <ConfigProvider locale={zhCN}>
+      <Table columns={[]} dataSource={[]} height={400} />
+    </ConfigProvider>
+  );
+}
+```
+
+具体 API、演示与注意事项请从侧边栏进入 **组件**、**Hooks**、**工具** 等文档。
+
+
+---
+
+## 组件
+
+来源：`docs/components/index.md`
+
+# 组件库
+
+这里是 `@orinui/components` 组件说明与示例入口。
+
+## 组件列表
+
+### 数据展示
+
+- [Chart 图表](/components/chart)
+- [ComplexTree 复杂树](/components/complex-tree)
+- [ListTree 左侧列表](/components/list-tree)
+- [SingleTree 侧边树](/components/single-tree)
+- [Table 表格](/components/table)
+
+### 表单
+
+- [DatePicker 日期选择](/components/date-picker)
+- [DateRangePicker 日期范围](/components/date-range)
+- [SingleDate 结束日期](/components/single-date)
+- [ExcelHandle Excel 解析](/components/excel-handle)
+- [CustomSelect 带全选的选择器](/components/tree-select)
+
+### 反馈与布局
+
+- [CustomModal 弹窗](/components/modal)
+- [Styled 布局样式](/components/styled)
+
+### 表格相关
+
+- [OperateBar 操作条](/components/operate-bar)
+- [TitleBar 表格说明栏](/components/title-bar)
+- [TableTabs 表格页签](/components/table-tabs)
+
+
+---
+
+## Hooks
+
+来源：`docs/hooks/index.md`
+
+# Hooks
+
+这里是 Hooks 的总览页面。
+
+## Hook 列表
+
+### observerHeight
+
+观察元素高度变化的 Hook，使用 ResizeObserver API 实现。
+
+```tsx | pure
+import { observerHeight } from '@orinui/hooks';
+import { useRef } from 'react';
+
+function MyComponent() {
+  const ref = useRef<HTMLDivElement>(null);
+  const height = observerHeight(ref);
+
+  return <div ref={ref}>当前高度: {height}px</div>;
+}
+```
+
+
+---
+
+## 工具
+
+来源：`docs/utils/index.md`
+
+# 工具函数
+
+这里是 `@orinui/utils` 工具函数说明与示例入口。
+
+## 模块列表
+
+### 日期与时间
+
+- [日期工具](/utils/date) — `getStartDate`、`getEndDate`、`formateDateRange`
+
+### 树与表格结构
+
+- [树形工具](/utils/tree) — `DataProcess`、`treeToArray`、`getRowSpan`、`deepAddField`、`mergeFieldsOnTree`、`setDisabledByCondition`
+
+### 数值与表格格式化
+
+- [表格工具](/utils/table) — `formatTableData`、`handleData`、`format`、`divide`、`multiply`、`formatToThousands`
+
+### 其他
+
+- [截图工具](/utils/screenshot) — `screenShotImage`
+- [对象与常量](/utils/object) — `unitOption`、`openObjectArry`、`getFirstOrDefault`
+
+
+---
+
+## AI Skills
+
+来源：`docs/ai-skills/index.md`
+
+# AI Skills
+
+这里是 AI Skills 的总览页面。
+
+## 简介
+
+AI Skills 包提供了一系列可复用的 AI 技能模块，用于增强组件库的智能化能力。
+
+## 使用方式
+
+```tsx | pure
+import { SkillExample } from '@orinui/ai-skills';
+
+function MyComponent() {
+  // 使用 AI 技能
+  return <SkillExample />;
+}
+```
+
+## 技能列表
+
+_待添加具体的 AI 技能模块_
+
+
+---
+
+## 更新日志
+
+来源：`docs/changelog/index.md`
+
+# 更新日志
+
+## @orinui/components
+
+### 0.0.1
+
+- 重构包名为 `@orinui/components`
+- 将 Hooks 迁移到独立包 `@orinui/hooks`
+- 将 Utils 迁移到独立包 `@orinui/utils`
+
+## @orinui/hooks
+
+### 0.0.1
+
+- 初始版本
+- 添加 `observerHeight` hook
+
+## @orinui/utils
+
+### 0.0.1
+
+- 初始版本
+- 从 `@orinui/components` 迁移所有工具函数
+
+## @orinui/ai-skills
+
+### 0.0.1
+
+- 初始版本
+
+
+---
+
+## Chart 图表
+
+来源：`docs/components/chart.md`
+
+## 何时使用
+
+- 需要基于 `echarts-for-react` 封装图表，实现组件化的 ECharts 渲染。
+- 需要对图表交互内容（如 Tooltip）进行格式化与自定义展示。
+- 需要在项目中统一图表容器/样式，提升可维护性。
+
+## 代码演示
+
+### 基础柱状图
+
+<code src="./demos/chart/basic.tsx"></code>
+
+### ChartTooltip 格式化
+
+<code src="./demos/chart/tooltip.tsx"></code>
+
+## API
+
+### Chart
+
+| 属性           | 说明                                          | 类型                                   | 默认值                              |
+| -------------- | --------------------------------------------- | -------------------------------------- | ----------------------------------- |
+| optionDefault  | 初始 ECharts option，传给 `echarts-for-react` | `EChartsOption`                        | -                                   |
+| optionChange   | 增量更新：有键时通过实例 `setOption` 合并更新 | `EChartsOption`                        | -                                   |
+| style          | 容器样式                                      | `CSSProperties`                        | `{ width: '100%', height: '100%' }` |
+| onEvents       | 图表事件，同 echarts-for-react                | `Record<string, (e: unknown) => void>` | `{}`                                |
+| registerEvents | 注册在 zrender 上的事件（`getZr().on`）       | `Record<string, (e: unknown) => void>` | `{}`                                |
+| notMerge       | 传给 `ReactEcharts`                           | `boolean`                              | `false`                             |
+| lazyUpdate     | 传给 `ReactEcharts`                           | `boolean`                              | `false`                             |
+| renderWithSVG  | 为 `true` 时使用 SVG 渲染器                   | `boolean`                              | `false`                             |
+
+### ChartTooltip（工具方法）
+
+包内导出为 `ChartTooltip` 默认对象，主要成员：
+
+| 成员           | 说明                                                                                        | 类型                                                                                           |
+| -------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| tooltipFormate | 将 echarts tooltip 的 `params` 格式化为 HTML 字符串（数组走 `createArrayTooltipFormatter`） | `(params: EChartsTooltipRow \| EChartsTooltipRow[], options?: CreateTooltipOptions) => string` |
+
+`CreateTooltipOptions` 含 `unit`、`precision`；`EChartsTooltipRow` 与 echarts tooltip 参数字段对齐（如 `marker`、`seriesName`、`axisValue` 等）。同一模块另有 `createArrayTooltipFormatter`、`createToolTipInner`、`createTooltipValueTmpl` 等命名导出，可按需从包内路径引用。
+
+
+---
+
+## ComplexTree 复杂树
+
+来源：`docs/components/complex-tree.md`
+
+## 何时使用
+
+- 需要树结构并需要全选功能。
+- 需要带树节点筛选。
+- 需要复杂节点之间联动。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/complex-tree/basic.tsx"></code>
+
+### 按住 Ctrl 键可进行子节点勾选
+
+<code src="./demos/complex-tree/ctrl.tsx"></code>
+
+### 多棵树之间切换
+
+<code src="./demos/complex-tree/toggle-tree.tsx"></code>
+
+### 不需要按住 ctrl 的父子联动
+
+tips:父节点也为真实节点所以子节点全部选中时父节点不会自动勾选
+<code src="./demos/complex-tree/check-strictly-tree.tsx"></code>
+
+### 父节点选中后自动禁用子节点
+
+<code src="./demos/complex-tree/disable-children-tree.tsx"></code>
+
+### 通过方法自定义禁用节点
+
+<code src="./demos/complex-tree/disable-fun-tree.tsx"></code>
+
+### 通过属性控制树单选
+
+<code src="./demos/complex-tree/multiple-tree.tsx"></code>
+
+## API
+
+### ComplexTree
+
+| 属性             | 说明                                                                                                                             | 类型                                 | 默认值                        |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ | ----------------------------- |
+| treeData         | 树数据，节点需包含 `key`、`name`，子节点放在 `children`                                                                          | `ComplexTreeNode[]`                  | -                             |
+| checkedKeys      | 受控：当前勾选的节点 key 列表                                                                                                    | `string[]`                           | -                             |
+| describeTips     | 启用 Ctrl 多选时在树上方展示的提示文案                                                                                           | `string`                             | `'Ctrl+选中：全选所有子节点'` |
+| toggleData       | 顶部切换条选项（多棵树切换时使用）                                                                                               | `ComplexTreeToggleItem[]`            | `[]`                          |
+| toggleKey        | 当前选中的切换项，对应 `toggleData[].value`                                                                                      | `string`                             | `''`                          |
+| disabledItemFunc | 自定义节点是否禁用，返回 `true` 表示禁用                                                                                         | `(item: ComplexTreeNode) => boolean` | -                             |
+| showLine         | 是否显示连接线                                                                                                                   | `boolean`                            | `true`                        |
+| switcherIcon     | 为 `true` 时展示顶部「快速检索」与「展开全部/收起全部」；为 `false` 时隐藏该区域；同时传入内部树用于控制展开图标样式（CSS 变量） | `boolean`                            | `true`                        |
+| onClickToggle    | 点击切换条某项时回调，参数为该项的 `value`                                                                                       | `(val: string) => void`              | -                             |
+| onClickCheck     | 勾选变化时回调；`keys` 为当前应同步的勾选 key；`e` 与 antd `Tree` 的 `onCheck` 回调第二个参数（info）一致                        | `(keys: string[], e) => void`        | -                             |
+| isCtrl           | 是否启用按住 Ctrl（Mac 为 Meta）时按子树批量勾选                                                                                 | `boolean`                            | `false`                       |
+| multiple_check   | 是否多选；为 `false` 时表现为单选                                                                                                | `boolean`                            | `true`                        |
+| checkStrictly    | 是否父子独立勾选（`true` 父子不关联）；为 `false` 时走父子联动                                                                   | `boolean`                            | `true`                        |
+| disableChildren  | 父节点选中后是否禁用其下子节点                                                                                                   | `boolean`                            | `false`                       |
+
+### ComplexTreeNode
+
+| 属性     | 说明                               | 类型                | 默认值 |
+| -------- | ---------------------------------- | ------------------- | ------ |
+| key      | 节点唯一标识                       | `string`            | -      |
+| name     | 节点展示名称（检索按 `name` 匹配） | `string`            | -      |
+| children | 子节点                             | `ComplexTreeNode[]` | -      |
+| disabled | 是否禁用该节点                     | `boolean`           | -      |
+
+### ComplexTreeToggleItem
+
+| 属性  | 说明                                               | 类型     | 默认值 |
+| ----- | -------------------------------------------------- | -------- | ------ |
+| value | 切换项值，用于 `toggleKey` 与 `onClickToggle` 入参 | `string` | -      |
+| label | 展示文案                                           | `string` | -      |
+
+
+---
+
+## ListTree 左侧列表
+
+来源：`docs/components/list-tree.md`
+
+## 何时使用
+
+- 需要左侧可折叠的复选框列表，用于分组/筛选。
+- 需要将树形数据以“多选”形式呈现，并支持联动选择。
+- 需要在页面中用统一的组件处理节点展开与选择状态。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/list-tree/basic.tsx"></code>
+
+## API
+
+基于 antd `Checkbox.Group`；`fieldNames` 用于指定选项中的 id / 文案字段名。
+
+### ListTree
+
+| 属性            | 说明                                                                    | 类型                                      | 默认值                       |
+| --------------- | ----------------------------------------------------------------------- | ----------------------------------------- | ---------------------------- |
+| checkboxOption  | 可选项列表，项内需包含 `fieldNames` 所指 id、name 字段；可选 `disabled` | `ListTreeCheckboxOption[]`                | -                            |
+| defaultValue    | 初始选中值（id 列表）                                                   | `(string \| number)[]`                    | -                            |
+| fieldNames      | 字段映射                                                                | `{ id: string; name: string }`            | `{ id: 'id', name: 'name' }` |
+| leftCheckChange | 选中变化时回调当前选中项对应的对象列表                                  | `(res: ListTreeCheckboxOption[]) => void` | -                            |
+| isSingle        | 为 `true` 时表现为单选（只保留最后一次勾选）                            | `boolean`                                 | `true`                       |
+
+
+---
+
+## SingleTree 侧边树
+
+来源：`docs/components/single-tree.md`
+
+## 何时使用
+
+- 需要侧边单选树形结构，方便在页面中完成层级选择。
+- 需要支持折叠/展开，以减少长列表造成的页面拥挤。
+- 需要与业务表单/筛选逻辑联动，实现单一条件的过滤或定位。
+
+## 代码演示
+
+### 常规使用
+
+<code src="./demos/single-tree/basic.tsx"></code>
+
+### 禁用左侧收起按钮
+
+<code src="./demos/single-tree/no-switch-icon.tsx"></code>
+
+### 使用 size（small,nomal,large）
+
+<code src="./demos/single-tree/size-tree.tsx"></code>
+
+## API
+
+树节点字段通过内部 `fieldNames` 固定为 `title: 'name'`、`key: 'id'`、`children: 'children'`，数据需使用 `id` / `name` / `children`。
+
+### SingleTree
+
+| 属性         | 说明                                                  | 类型                                   | 默认值    |
+| ------------ | ----------------------------------------------------- | -------------------------------------- | --------- |
+| treeData     | 树数据                                                | `DataNode[]`（使用 `id`、`name` 字段） | -         |
+| selectedKeys | 当前选中节点 key（单选）                              | `Key`                                  | -         |
+| onSelectKeys | 选中变化，`key` 为节点 id，`node` 为 antd 树节点      | `(key: Key, node: DataNode) => void`   | -         |
+| size         | 尺寸样式类名：`sider-tree-small` / `sider-tree-large` | `'large' \| 'small'`                   | `'large'` |
+| showSwitcher | 是否显示树展开/收起开关（默认隐藏）                   | `boolean`                              | `false`   |
+
+
+---
+
+## Table 表格
+
+来源：`docs/components/table.md`
+
+## 何时使用
+
+- 在 **antd 5** `Table` 能力之上，统一表格区域高度、纵向滚动与样式（`custom-table`）。
+- 需要固定**整体区域高度** `height`，由组件根据**表头层级**、**上下边距**、**是否分页**等估算内容区，并合并到 `scroll.y`。
+- 数据量很大时，使用 antd 5 自带的 **`virtual`** 做行虚拟滚动，无需第三方虚拟列表库。
+- 虚拟表格下，若未显式传入 `scroll.x`，横向宽度默认为**各叶子列宽度之和**（支持带 `children` 的多级表头）。
+
+## 代码演示
+
+### 基础表格
+
+不开启虚拟滚动，适合行数较少、仅需固定高度与纵向滚动的场景。
+
+<code src="./demos/table/basic.tsx"></code>
+
+### 带分页
+
+传入 antd 的 `pagination`（非 `false`）时，组件会为底部分页条预留约 60px，再计算 `scroll.y`。
+
+<code src="./demos/table/pagination.tsx"></code>
+
+### 表头高度与行高
+
+- **`singleHeaderHeight`**：单层表头行高（px），默认 `40`。用于估算多级表头总高度 `(depth + 1) * singleHeaderHeight`，并写入根节点 CSS 变量 **`--orinui-table-header-cell-height`**，表头单元格样式与之对齐。
+- **`listItemHeight`**：表体行高（px），默认 `36`。写入 CSS 变量 **`--orinui-table-body-row-height`**；开启 **`virtual`** 时同时作为 rc-table 的 **`listItemHeight`**，须与样式一致。
+
+下列示例依次为：**默认值**、**普通表加大表头/行高**、**虚拟表紧凑表头/行高**。
+
+<code src="./demos/table/header-row-height.tsx"></code>
+
+### 虚拟列表
+
+设置 `virtual`（或 `virtual={true}`）启用 antd 5 内置虚拟表格。请为列设置合适的 `width`，以便横向宽度与滚动行为稳定；未传 `scroll.x` 时，组件内部会按叶子列宽度汇总（见 `sumLeafColumnWidths`）。
+
+<code src="./demos/table/virtual.tsx"></code>
+
+### 多级表头 + 虚拟
+
+通过 `columns` 的 `children` 配置分组表头；虚拟模式下同样依赖叶子列的 `width` 计算默认 `scroll.x`。
+
+<code src="./demos/table/grouped-header.tsx"></code>
+
+### 不传 scroll.x（虚拟表自动汇总宽度）
+
+仅在 **`virtual === true`** 时，未显式设置 `scroll.x` 的情况下，组件会把 `scroll.x` 设为所有叶子列 `width`（及 `minWidth`）之和；和为 0 时回退为 `'max-content'`。下列示例包括：**完全不传 `scroll`**，以及**只传不含 `x` 的 `scroll`**（如 `scrollToFirstRowOnChange`），并演示左/右固定列在**不传 `scroll.x`** 时仍由自动宽度支撑横向滚动。
+
+<code src="./demos/table/without-scroll-x.tsx"></code>
+
+### 横向滚动与固定列
+
+列较多时需要**横向滚动**：普通表格请在 `scroll` 中传入 **`scroll.x`**（数值、`'max-content'` 等与 antd 一致）；**固定列**在列上设置 `fixed: 'left' | 'right'`，并与 `scroll.x` 同时使用（与 [antd Table 固定列](https://ant.design/components/table-cn#components-table-demo-fixed-columns) 要求一致）。
+
+虚拟表格下若未传 `scroll.x`，仍可由组件按叶子列宽自动汇总；固定列场景下也推荐显式传入 `scroll.x`，与列宽设计对齐。
+
+下列示例上半部分为**普通表格**，下半部分为**虚拟表格**，均包含左固定「序号」、右固定「操作」与中间可横向滚动的数据列。
+
+<code src="./demos/table/scroll-fixed.tsx"></code>
+
+### TableUtils
+
+<code src="./demos/table/utils.tsx"></code>
+
+## API
+
+在 [antd Table](https://ant.design/components/table-cn) 的 `TableProps` 上扩展了高度与虚拟滚动相关字段。**`height` 为必填**（用于计算 `scroll.y`）。其余属性与 antd 5 一致，详见官方文档。
+
+### Table（VirtualTableProps）
+
+| 属性               | 说明                                                                                                    | 类型      | 默认值   |
+| ------------------ | ------------------------------------------------------------------------------------------------------- | --------- | -------- |
+| height             | 表格**整体区域**高度（px），用于计算纵向滚动区域 `scroll.y`（扣除表头高度、`paddingNum`、分页条占位等） | `number`  | （必填） |
+| virtual            | 是否启用 antd 5 **内置**虚拟表格（行虚拟滚动）                                                          | `boolean` | `false`  |
+| singleHeaderHeight | 单层表头行高（px），参与表头总高估算，并写入 `--orinui-table-header-cell-height`                        | `number`  | `40`     |
+| listItemHeight     | 表体行高（px），写入 `--orinui-table-body-row-height`；`virtual` 时兼为 rc-table 行高                   | `number`  | `36`     |
+| paddingNum         | 从 `height` 中扣除的**上下边距**总和（px），如容器内边距                                                | `number`  | `48`     |
+| isScroll           | 预留字段，与传入的 `scroll` 合并策略以源码为准                                                          | `boolean` | -        |
+| id                 | 可选，表格根节点标识                                                                                    | `string`  | -        |
+
+**滚动行为说明：**
+
+- **`scroll.y`**：若未在 `scroll` 中传入 `y`，则由组件根据 `height`、表头层数、`paddingNum`、是否分页等计算；若你显式传入 `scroll.y`，则以传入值为准。
+- **`scroll.x`**：
+  - **`virtual === false`（普通表格）**：组件**不会**自动写入 `scroll.x`，需要横向滚动或**固定列**时，请自行传入 `scroll.x`（或 `'max-content'` 等），否则无法形成横向滚动容器。
+  - **`virtual === true`（虚拟表格）**：若未在 `scroll` 中传入 `x`，则取所有**叶子列** `width`（及 `minWidth` 兜底）之和；若为 0 则回退为 `'max-content'`。支持带 `children` 的列配置。使用**固定列**时仍建议显式设置 `scroll.x`。
+- **固定列**：在列配置中设置 `fixed: 'left'` / `fixed: 'right'`，并保证 `scroll.x` 大于表格可视宽度，行为与 antd 5 一致。
+- 组件默认：`size="middle"`、`bordered={true}`、`pagination={false}`、`rowKey="id"`，均可被覆盖。
+- **表头/行高**：`singleHeaderHeight`、`listItemHeight` 会通过根节点 **CSS 变量**（`--orinui-table-header-cell-height`、`--orinui-table-body-row-height`）驱动 `index.less` 中的表头与表体高度；若外层覆盖 `style`，请保留或自行合并这两个变量。
+
+### TableUtils
+
+| 方法                | 说明                                                               |
+| ------------------- | ------------------------------------------------------------------ |
+| getCellColor        | 按 `level` 返回单元格背景色样式（如 `'1'`、`'2'`）                 |
+| getCellText         | 按 `level` 返回加粗等格式化单元格内容或纯文本                      |
+| sumLeafColumnWidths | 递归汇总叶子列宽度（工具方法，虚拟表默认 `scroll.x` 逻辑与此一致） |
+
+
+---
+
+## DateRangePicker 日期范围
+
+来源：`docs/components/date-range.md`
+
+## 何时使用
+
+- 需要日期范围选择能力，并支持开始/结束日期联动。
+- 需要快捷区间（如近一周/近一个月）快速选择日期范围。
+- 需要配合 `DateRangeUtils` 进行快捷区间与日期计算的扩展。
+
+## 代码演示
+
+### 正常使用
+
+<code src="./demos/date-range/basic.tsx"></code>
+
+### 自定义左侧快捷选项
+
+<code src="./demos/date-range/option-date.tsx"></code>
+
+### 禁用左侧快捷选项
+
+<code src="./demos/date-range/no-option-date.tsx"></code>
+
+### 自定义最小日期
+
+tips:默认最小日期为 2002 年 1 月 1 日，在选择成立以来选项时开始日期会设置为最小日期
+
+<code src="./demos/date-range/custom-min-date.tsx"></code>
+
+### 自定义日期禁用规则
+
+tips:默认为明日不可选择
+
+<code src="./demos/date-range/disable-date.tsx"></code>
+
+### DateRangeUtils
+
+<code src="./demos/date-range/utils.tsx"></code>
+
+## API
+
+左侧快捷项内置「指定日 / 近 1 月 / … / 成立以来」等，可通过 `optionsValue` 筛选；`showQuickSelect` 为 `false` 时只保留两个 `DatePicker`。
+
+### DateRangePicker
+
+| 属性            | 说明                                   | 类型                                 | 默认值                                     |
+| --------------- | -------------------------------------- | ------------------------------------ | ------------------------------------------ |
+| id              | 根节点 `id`                            | `string`                             | -                                          |
+| value           | 受控：区间与快捷项                     | `DateRangeValue`                     | 内置 `getInitValue(2, format)`             |
+| format          | 日期格式                               | `string`                             | `'YYYY-MM-DD'`                             |
+| disabledDate    | 不可选日期                             | 同 antd `DatePicker['disabledDate']` | 默认禁用「明日及之后」                     |
+| onChange        | 值变化                                 | `(value: DateRangeValue) => void`    | -                                          |
+| optionsValue    | 允许的快捷项（不含 `custom`）          | `string[]`                           | `['1','3','6','12','36','60','establish']` |
+| minDate         | 「成立以来」等逻辑使用的最早日期字符串 | `string`                             | `'2002-01-01'`                             |
+| showQuickSelect | 是否显示左侧快捷下拉                   | `boolean`                            | `true`                                     |
+
+### DateRangeValue
+
+| 属性      | 说明                  | 类型               | 默认值 |
+| --------- | --------------------- | ------------------ | ------ |
+| selectVal | 当前快捷项或 `custom` | `string`           | -      |
+| date      | `[开始, 结束]`        | `[Dayjs, Dayjs]`   | -      |
+| dateStr   | 格式化后的起止字符串  | `[string, string]` | -      |
+
+### DateRangeUtils
+
+| 方法 / 对象         | 说明                                     | 备注                                             |
+| ------------------- | ---------------------------------------- | ------------------------------------------------ |
+| getPastDayOfSomeDay | 从某日按单位前推                         | 参数含 `someDay`、`amount`、`dateUnit`、`format` |
+| getBeginDate        | 结合结束日与快捷月数、最早日计算开始日   | `(endDate, amount, minDate)`                     |
+| getOption           | 在 options 中按 `value` 查找项           | -                                                |
+| assignDateValidate  | 校验区间及可选「最短时间差」             | 返回两个表单项的校验结果数组                     |
+| getInitValue        | 默认区间：上上月末所在年年初 ～ 上上月末 | `(forward?, format?)`                            |
+| getMonthInitValue   | 上上月整月区间                           | -                                                |
+| getQuarterInitValue | 上一完整季度区间                         | -                                                |
+
+
+---
+
+## SingleDate 结束日期
+
+来源：`docs/components/single-date.md`
+
+## 何时使用
+
+- 需要在日期选择中单独控制“结束日”行为。
+- 需要配合 `SingleDateUtils` 获取/计算结束日逻辑，减少重复代码。
+- 需要与起始日期联动，提升表单交互的一致性。
+
+## 代码演示
+
+### 简单使用
+
+<code src="./demos/single-date/basic.tsx"></code>
+
+### SingleDateUtils
+
+<code src="./demos/single-date/utils.tsx"></code>
+
+## API
+
+下拉项内置「指定日 / 上季末 / 上半年末 / 上年末」，可通过 `optionsValue` 控制展示哪些快捷项（始终包含 `custom`）。
+
+### SingleDate
+
+源码中值类型为 `DateRangeValue`、Props 类型名为 `DateRangeProps`，与 **DateRangePicker** 的命名相近，使用时以包导出名 **SingleDate** 为准。
+
+| 属性         | 说明                                                                     | 类型                                       | 默认值                                      |
+| ------------ | ------------------------------------------------------------------------ | ------------------------------------------ | ------------------------------------------- |
+| id           | 根节点 `id`                                                              | `string`                                   | -                                           |
+| value        | 受控值：`selectVal` 为快捷项或 `custom`；`date` / `dateStr` 为当前结束日 | `DateRangeValue`                           | 与 `getInitValue()` 合并后的初始值          |
+| format       | 日期格式化                                                               | `string`                                   | `'YYYY-MM-DD'`                              |
+| disabledDate | 不可选日期，同 antd `DatePicker`                                         | 同 antd `DatePicker` 的 `disabledDate`     | 默认禁用「明日及之后」                      |
+| onChange     | 值变化                                                                   | `(value: DateRangeValue) => void`          | -                                           |
+| optionsValue | 允许的快捷项 value（不含 `custom`）                                      | `string[]`                                 | `['1','3','6']`（上季末、上半年末、上年末） |
+| picker       | 日期粒度                                                                 | `'date' \| 'quarter' \| 'month' \| 'year'` | `'date'`                                    |
+
+### DateRangeValue（SingleDate）
+
+| 属性      | 说明                  | 类型     | 默认值 |
+| --------- | --------------------- | -------- | ------ |
+| selectVal | 当前快捷项或 `custom` | `string` | -      |
+| date      | 当前结束日            | `Dayjs`  | -      |
+| dateStr   | 结束日字符串          | `string` | -      |
+
+### SingleDateUtils
+
+包导出为 `SingleDateUtils` 默认对象，包含：
+
+| 成员               | 说明                                        | 签名                                                                         |
+| ------------------ | ------------------------------------------- | ---------------------------------------------------------------------------- |
+| assignDateValidate | 校验是否已选日期，用于表单                  | `(date: string) => { state, message }`                                       |
+| getInitValue       | 默认结束日：当前月往前 `forward` 个月的月末 | `(forward?: number, format?: string) => { date, dateStr }`，默认 `forward=2` |
+| getQuarterDay      | 上季末                                      | `(format: string) => { date, dateStr }`                                      |
+
+组件内部还会用到 `getHalfYearDay`、`getLastYearDay`，未挂到该默认导出对象上。
+
+
+---
+
+## ExcelHandle Excel 解析
+
+来源：`docs/components/excel-handle.md`
+
+## 何时使用
+
+- 需要在前端读取 Excel 文件并完成解析/数据映射。
+- 需要对上传入口（如点击触发）进行封装复用。
+- 需要在业务中复用统一的 `xlsx` 读取流程，减少重复实现。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/excel-handle/basic.tsx"></code>
+
+## API
+
+`ExcelHandle` 为默认导出对象，解构使用：`const { Excel, uploadClick } = ExcelHandle`。
+
+### Excel
+
+| 属性       | 说明                                                             | 类型                              | 默认值 |
+| ---------- | ---------------------------------------------------------------- | --------------------------------- | ------ |
+| exportData | 读取首个工作表并通过 `XLSX.utils.sheet_to_json` 得到行数组后回调 | `(data: ExcelSheetRow[]) => void` | -      |
+
+`ExcelSheetRow` 为 `Record<string, unknown>`，首行作为字段名。
+
+### uploadClick
+
+触发组件内隐藏的 `input[type=file]`（会先清空 `value` 以便重复选同一文件），用于外部按钮绑定。
+
+| 类型         | 说明         |
+| ------------ | ------------ |
+| `() => void` | 打开文件选择 |
+
+
+---
+
+## CustomSelect 带全选的选择器
+
+来源：`docs/components/custom-select.md`
+
+## 何时使用
+
+- 需要基于 `antd` `TreeSelect` 的树形下拉选择，并补充全选等扩展能力。
+- 需要在表单中以层级结构选择一个或多个节点（更清晰的分类选择）。
+- 需要在下拉内提供更完善的交互入口，提升选择效率。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/custom-select/basic.tsx"></code>
+
+## API
+
+基于 antd `TreeSelect`，固定 `treeCheckable` 为 `true`；在 `treeData` / `value` / `onChange` / `fieldNames` 等与下表一致的用法上封装了全选区域（见 `popupRender`）。**其余属性**与 antd [TreeSelect](https://4x.ant.design/components/tree-select-cn/) 一致（类型上省略了 `treeData`、`value`、`onChange`、`open` 的默认定义，由本组件声明）。
+
+### CustomSelect
+
+| 属性         | 说明                         | 类型                            | 默认值                                                     |
+| ------------ | ---------------------------- | ------------------------------- | ---------------------------------------------------------- |
+| treeData     | 树形数据                     | `TreeSelectProps['treeData']`   | `[]`                                                       |
+| value        | 已选值（多选为 key 数组）    | `string[]`                      | `[]`                                                       |
+| onChange     | 选择变化                     | `(value: string[]) => void`     | -                                                          |
+| fieldNames   | 字段映射                     | 同 antd TreeSelect `fieldNames` | `{ label: 'label', value: 'value', children: 'children' }` |
+| queryloading | 下拉内全选区域是否处于加载态 | `boolean`                       | `false`                                                    |
+
+
+---
+
+## CustomModal 弹窗
+
+来源：`docs/components/modal.md`
+
+## 何时使用
+
+- 需要对 `antd` 的 `Modal` 进行封装，并统一 `wrapClassName`。
+- 需要在弹窗中承载自定义内容（如表单/信息展示），同时保持样式一致性。
+- 需要集中管理弹窗容器层的 className，便于全局风格调整。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/modal/basic.tsx"></code>
+
+## API
+
+与 antd [Modal](https://4x.ant.design/components/modal-cn/) 的 **API 一致**（类型为 `ModalProps`）。本封装会固定设置根容器 **`wrapClassName='dialog-item'`**（用于统一弹窗样式），其余行为与 antd 相同。
+
+
+---
+
+## OperateBar 操作条
+
+来源：`docs/components/operate-bar.md`
+
+## 何时使用
+
+- 需要在表格顶部提供通用能力（如下载、单位切换等）。
+- 需要将顶部操作区域与表格内容解耦，便于复用到不同页面。
+- 需要在页面中保持表格头部布局与交互风格一致。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/operate-bar/basic.tsx"></code>
+
+## API
+
+### OperateBar
+
+| 属性        | 说明                                             | 类型                     | 默认值 |
+| ----------- | ------------------------------------------------ | ------------------------ | ------ |
+| unitChar    | 单位展示文案（与 `unitOption` 二选一或组合使用） | `string`                 | -      |
+| unit        | 当前选中的单位值，用于高亮 `unitOption` 中对应项 | `string`                 | -      |
+| downloadFun | 点击「下载」时回调；不传则不显示下载入口         | `() => void`             | -      |
+| unitOption  | 可选单位列表                                     | `OperateBarUnitOption[]` | -      |
+| unitFun     | 切换单位时回调，参数为选中项的 `unit`            | `(unit: string) => void` | -      |
+
+### OperateBarUnitOption
+
+| 属性 | 说明     | 类型     | 默认值 |
+| ---- | -------- | -------- | ------ |
+| unit | 单位值   | `string` | -      |
+| name | 展示名称 | `string` | -      |
+
+
+---
+
+## TitleBar 表格标题
+
+来源：`docs/components/title-bar.md`
+
+## 何时使用
+
+- 需要二级标题与右侧操作区的组合，用于增强表格语义与操作入口。
+- 需要将“二级标题/操作区”作为可复用布局能力，包裹表格或其它内容。
+- 需要在保持视觉一致的同时，支持右侧区域的灵活渲染。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/title-bar/basic.tsx"></code>
+
+## API
+
+### TitleBar
+
+| 属性         | 说明                                                | 类型                  | 默认值      |
+| ------------ | --------------------------------------------------- | --------------------- | ----------- |
+| leftContent  | 左侧内容（通常为标题）                              | `ReactNode`           | -           |
+| rightContent | 右侧内容（通常为操作）                              | `ReactNode`           | -           |
+| leftStyle    | 左侧容器额外样式（会与内置 `text` 类型样式合并）    | `CSSProperties`       | -           |
+| rightStyle   | 右侧容器额外样式                                    | `CSSProperties`       | -           |
+| leftType     | 左侧预设：`text` 为标题色；`opreate` 为链接式操作色 | `'text' \| 'opreate'` | `'text'`    |
+| rightType    | 右侧预设，同上                                      | `'text' \| 'opreate'` | `'opreate'` |
+
+
+---
+
+## CustomTabs 表格页签
+
+来源：`docs/components/custom-tabs.md`
+
+## 何时使用
+
+- 需要带统一样式的 `antd` Tabs 容器，用于承载同一页面内的多视图/多状态切换。
+- 需要把切换逻辑与具体内容解耦，便于维护和扩展。
+- 需要在表格/数据区域上保持风格一致的标签交互。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/custom-tabs/basic.tsx"></code>
+
+## API
+
+### CustomTabs
+
+| 属性      | 说明              | 类型                    | 默认值 |
+| --------- | ----------------- | ----------------------- | ------ |
+| activeKey | 当前激活页签      | `string`                | -      |
+| items     | 页签项（同 antd） | `TabsProps['items']`    | -      |
+| onChange  | 切换页签          | `TabsProps['onChange']` | -      |
+
+
+---
+
+## Styled 布局样式
+
+来源：`docs/components/styled.md`
+
+## 何时使用
+
+- 需要基于 `styled-components` 封装一组可复用的样式组件。
+- 需要通过函数返回“布局片段”，快速在多个页面中复用样式。
+- 需要统一样式组织方式，降低样式散落和重复编写的成本。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/styled/basic.tsx"></code>
+
+### 使用 formPanle 进行查询区域自适应适配
+
+<code src="./demos/styled/use-form-panel.tsx"></code>
+
+
+---
+
+## FormPanel 表单布局
+
+来源：`docs/components/form-panel.md`
+
+## 何时使用
+
+- form 按照表单内容和按钮进行自适应。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/form-panel/basic.tsx"></code>
+
+## API
+
+### FormPanel
+
+| 属性     | 说明                                   | 类型        | 默认值 |
+| -------- | -------------------------------------- | ----------- | ------ |
+| width    | 左侧区域宽度（px），影响 flex 固定列宽 | `number`    | `280`  |
+| children | form 表单的 item                       | `ReactNode` | -      |
+
+
+---
+
+## CollapsePanel 左侧布局
+
+来源：`docs/components/collapse-panel.md`
+
+## 何时使用
+
+- 需要左侧收起功能 panel 时使用。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/collapse-panel/basic.tsx"></code>
+
+## API
+
+### CollapsePanel
+
+| 属性     | 说明                                   | 类型        | 默认值 |
+| -------- | -------------------------------------- | ----------- | ------ |
+| width    | 左侧区域宽度（px），影响 flex 固定列宽 | `number`    | `280`  |
+| children | 收起面板内的内容                       | `ReactNode` | -      |
+
+
+---
+
+## observerHeight 高度观察
+
+来源：`docs/hooks/observer-height.md`
+
+# observerHeight
+
+观察元素高度变化的 Hook，使用 ResizeObserver API 实现。
+
+## 代码演示
+
+<code src="./demos/basic.tsx"></code>
+
+## API
+
+```typescript
+const height = observerHeight(ref: React.RefObject<HTMLElement>): number;
+```
+
+### 参数
+
+| 参数 | 说明               | 类型                           | 默认值 |
+| ---- | ------------------ | ------------------------------ | ------ |
+| ref  | 要观察的元素的 ref | `React.RefObject<HTMLElement>` | -      |
+
+### 返回值
+
+| 参数   | 说明           | 类型     |
+| ------ | -------------- | -------- |
+| height | 元素的当前高度 | `number` |
+
+## 备注
+
+- 使用了 500ms 的防抖来优化性能
+- 在组件卸载时会自动取消观察
+
+
+---
+
+## 日期工具
+
+来源：`docs/utils/date.md`
+
+## 何时使用
+
+- 需要按「相对当前时间」取某时间单位的起止日期字符串。
+- 需要将双日期控件的展示值转为接口常用的 `beginDate` / `endDate`（无连字符）参数。
+
+## 代码演示
+
+### 起止日期
+
+<code src="./demos/date/basic.tsx"></code>
+
+### 日期区间参数
+
+<code src="./demos/date/range.tsx"></code>
+
+
+---
+
+## 树形工具
+
+来源：`docs/utils/tree.md`
+
+## 何时使用
+
+- 需要将树形表头或树形数据拉平、扁平化。
+- 需要为表格行数据计算合并行（`rowSpan`）字段。
+- 需要在树数据上合并字段、按条件设置 `disabled` 等。
+
+## 代码演示
+
+### 拉平与扁平化
+
+<code src="./demos/tree/flatten.tsx"></code>
+
+### 行合并 rowSpan
+
+<code src="./demos/tree/row-span.tsx"></code>
+
+### 树字段合并与禁用
+
+<code src="./demos/tree/advanced.tsx"></code>
+
+
+---
+
+## 表格工具
+
+来源：`docs/utils/table.md`
+
+## 何时使用
+
+- 需要对大数字做字符串层面的乘除与保留小数，避免精度问题。
+- 需要按列单位（元 / 万 / 亿等）格式化表格单元格展示。
+
+## 代码演示
+
+### 大数运算与千分位
+
+<code src="./demos/table/number.tsx"></code>
+
+### 按列配置格式化行数据
+
+<code src="./demos/table/format-table.tsx"></code>
+
+
+---
+
+## 截图工具
+
+来源：`docs/utils/screenshot.md`
+
+## 何时使用
+
+- 需要将页面中某个带 `id` 的 DOM 区域导出为 PNG（base64）时使用。
+
+## 代码演示
+
+### DOM 截图
+
+<code src="./demos/screenshot/basic.tsx"></code>
+
+
+---
+
+## 对象与常量
+
+来源：`docs/utils/object.md`
+
+## 何时使用
+
+- 需要金额等单位选项配置。
+- 需要将「对象数组」按字段聚合成「字段 → 值数组」结构。
+- 需要安全读取列表首项的某个字段。
+
+## 代码演示
+
+### unitOption / openObjectArry / getFirstOrDefault
+
+<code src="./demos/object/basic.tsx"></code>
+
+
+---
+
+## 首页
+
+来源：`docs/index.md`
+
+orinui
+
+
+---
+
+## 附录：包导出与源码路径（库维护者 / 校验用）
+
+> 以下内容**不是**业务集成所必需；由 `packages/*/src/index.ts` 自动解析，便于与 barrel 对照。主索引请使用上文文档链接。
+
+### @orinui/components
+
+包目录：`packages/components/`
+
+| 符号 | 源码路径（相对包 `src`） |
+| --- | --- |
+| Chart | chart/index.tsx |
+| ChartTooltip | chart/chartTooltip.ts |
+| CollapsePanel | collapse-panel/index.tsx |
+| ComplexTree | complex-tree/index.tsx |
+| CustomModal | modal/index.tsx |
+| CustomSelect | custom-select/index.tsx |
+| CustomTabs | custom-tabs/index.tsx |
+| DateRangePicker | date-range/index.tsx |
+| DateRangeUtils | date-range/utils.ts |
+| ExcelHandle | excel-handle/index.tsx |
+| FormPanel | form-panel/index.tsx |
+| ListTree | list-tree/index.tsx |
+| OperateBar | operate-bar/index.tsx |
+| SingleDate | single-date/index.tsx |
+| SingleDateUtils | single-date/utils.ts |
+| SingleTree | single-tree/index.tsx |
+| Styled | styled/index.ts |
+| Table | table/index.tsx |
+| TableUtils | table/utils.tsx |
+| TitleBar | title-bar/index.tsx |
+
+
+### @orinui/hooks
+
+包目录：`packages/hooks/`
+
+| 符号 | 源码路径（相对包 `src`） |
+| --- | --- |
+| useObserverHeight | use-observer-height/index.ts |
+
+
+### @orinui/utils
+
+包目录：`packages/utils/`
+
+| 符号 | 源码路径（相对包 `src`） |
+| --- | --- |
+| DataProcess | tree-table.ts |
+| deepAddField | tree-table.ts |
+| divide | data-process.ts |
+| findFirstLeafNodeInArray | tree-table.ts |
+| formateDateRange | date.ts |
+| formatTableData | data-process.ts |
+| formatToThousandsRounded | data-process.ts |
+| getEndDate | date.ts |
+| getFirstOrDefault | object-array.ts |
+| getRowSpan | tree-table.ts |
+| getStartDate | date.ts |
+| getValuesForFields | tree-table.ts |
+| handleData | data-process.ts |
+| mergeFieldsOnTree | tree-table.ts |
+| multiply | data-process.ts |
+| openObjectArry | object-array.ts |
+| roundToDecimalPlaces | data-process.ts |
+| screenShotImage | screenshot.ts |
+| setDisabledByCondition | tree-table.ts |
+| treeToArray | tree-table.ts |
+| unitOption | constants.ts |
+| default | (aggregate object — 兼容旧版，成员见上表具名导出) |
+
+
+### @orinui/ai-skills
+
+包目录：`packages/ai-skills/`
+
+| 符号 | 源码路径（相对包 `src`） |
+| --- | --- |
+| （无） | 占位 export {}，待补充技能模块导出 |
+
+

@@ -1,8 +1,41 @@
 import { defineConfig } from 'dumi';
+import fs from 'fs';
 import * as path from 'path';
 
 export default defineConfig({
   outputPath: 'docs-dist',
+  /**
+   * Umi 4 不接受顶层 `devServer`，通过 chainWebpack 注入 webpack-dev-server 的
+   * setupMiddlewares，使开发环境能返回 `public/llms*.txt` 的 text/plain（否则为 SPA 的 HTML）。
+   */
+  chainWebpack(config) {
+    const pub = path.join(__dirname, 'public');
+    config.devServer.set('setupMiddlewares', (middlewares: any[]) => {
+      middlewares.unshift({
+        name: 'orinui-llms-static',
+        middleware: (
+          req: { url?: string },
+          res: {
+            setHeader: (k: string, v: string) => void;
+            end: (b: Buffer | string) => void;
+          },
+          next: () => void,
+        ) => {
+          const pathname = (req.url ?? '').split('?')[0];
+          if (pathname !== '/llms.txt' && pathname !== '/llms-full.txt') {
+            return next();
+          }
+          const file = path.join(pub, path.basename(pathname));
+          if (!fs.existsSync(file)) {
+            return next();
+          }
+          res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+          res.end(fs.readFileSync(file));
+        },
+      });
+      return middlewares;
+    });
+  },
   alias: {
     '@orinui/components': path.resolve(__dirname, 'packages/components/src'),
     '@orinui/hooks': path.resolve(__dirname, 'packages/hooks/src'),
