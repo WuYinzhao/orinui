@@ -26,6 +26,46 @@ export const treeToArray = (tree: any) => {
   return res;
 };
 
+/**
+ * 根据指定的键和映射字段，从数据数组中提取对应的值
+ * @param data 数据数组，每个元素是一个键值对对象
+ * @param keys 需要提取数据的键数组
+ * @param mappingFields 需要映射的字段数组
+ * @param keyField 键字段名，默认为'key'
+ * @returns 返回一个对象，其键是mappingFields中的字段，值是对应字段在data中keys指定的键上的值数组
+ */
+export const getValuesForFields = (
+  data: { [key: string]: any }[] = [],
+  keys: string[] = [],
+  mappingFields: string[] = [],
+  keyField: string = 'key',
+): { [key: string]: any[] } => {
+  // 检查输入参数是否为空
+  if (keys.length === 0 || mappingFields.length === 0) {
+    return {};
+  }
+
+  const result: { [key: string]: any[] } = {};
+
+  // 初始化结果对象
+  mappingFields.forEach((field) => {
+    result[field] = [];
+  });
+
+  // 遍历 keys 并获取对应的值
+  keys.forEach((key) => {
+    const item = data.find((item) => item[keyField] === key);
+    // 检查 item 是否存在
+    if (item) {
+      mappingFields.forEach((field) => {
+        result[field].push(item[field]);
+      });
+    }
+  });
+
+  return result;
+};
+
 /** 判断某行是否要合并 */
 export const getRowSpan = (data = [], colNameList: string[]) => {
   colNameList.forEach((colName: string, index: number) => {

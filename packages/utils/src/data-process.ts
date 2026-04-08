@@ -77,21 +77,24 @@ export function handleData(
   element: string | number,
   unit: string,
   round: number,
+  toThousands: boolean = true,
 ) {
   if (element === 0 || (element && !isNaN(Number(element)))) {
     let item = handleDataByUnit(element, unit, round);
-    switch (unit) {
-      case '0':
-      case '1':
-      case '2':
-      case '4':
-      case '5':
-      case '6':
-        item = formatToThousandsRounded(item, round);
-        break;
-      case '3':
-        item = formatToThousandsRounded(item, 0);
-        break;
+    if (toThousands) {
+      switch (unit) {
+        case '0':
+        case '1':
+        case '2':
+        case '4':
+        case '5':
+        case '6':
+          item = formatToThousandsRounded(item, round);
+          break;
+        case '3':
+          item = formatToThousandsRounded(item, 0);
+          break;
+      }
     }
     return item;
   }
