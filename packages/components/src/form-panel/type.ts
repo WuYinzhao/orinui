@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 export interface FormPanelProps extends FormProps {
   children?: ReactNode;
   onQuery?: (values: any) => void;
-  queryLoading?: boolean;
+  loading?: boolean;
   useResetButton?: boolean;
   onReset?: () => void;
 }

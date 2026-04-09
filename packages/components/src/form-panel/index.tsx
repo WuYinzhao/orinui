@@ -8,12 +8,12 @@ export default (props: FormPanelProps) => {
     children,
     onQuery,
     onReset,
-    queryLoading = false,
+    loading = false,
     useResetButton = true,
     ...otherProps
   } = props;
   return (
-    <Spin spinning={queryLoading}>
+    <Spin spinning={loading}>
       <FormContent>
         <Form layout="inline" form={form} {...otherProps}>
           {children}
