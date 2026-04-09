@@ -24,9 +24,9 @@
 
 相关文件共 **两份**，由 `pnpm run generate:llm` 生成：
 
-| 文件 | 作用 |
-| --- | --- |
-| **`llms.txt`** | **主索引**（推荐优先提供给 AI 或放在上下文中）。 |
+| 文件                | 作用                                                                                                                      |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **`llms.txt`**      | **主索引**（推荐优先提供给 AI 或放在上下文中）。                                                                          |
 | **`llms-full.txt`** | 可选：按侧栏顺序拼接各文档正文，并附「包导出附录」；体积大；可用 `node scripts/generate-llm-txt.mjs --no-full` 跳过生成。 |
 
 ### 文件位置与浏览器访问（`public/`）
@@ -36,9 +36,9 @@
 1. **仓库根目录**（`llms.txt`、`llms-full.txt`）：便于在编辑器、Git、工具链中直接打开，与常见「根目录 `llms.txt`」习惯一致。
 2. **`public/` 目录**：构建产物会把其中文件拷到站点根（如 `docs-dist/llms.txt`）。**本地 `pnpm dev` 时**，默认会把未知路径交给 SPA，直接访问 `/llms*.txt` 往往得到 **HTML 壳子**而非纯文本；项目在 **`.dumirc.ts`** 里用 `chainWebpack` 注入了 `setupMiddlewares`，对 `/llms.txt`、`/llms-full.txt` 优先返回 `public/` 中的 **`text/plain`**。修改该配置或首次生成 `public/` 后请**重启** `pnpm dev`。
 
-| 文件 | 在浏览器中打开 |
-| --- | --- |
-| 主索引 | <a href="/llms.txt" target="_blank" rel="noreferrer">llms.txt</a> |
+| 文件     | 在浏览器中打开                                                              |
+| -------- | --------------------------------------------------------------------------- |
+| 主索引   | <a href="/llms.txt" target="_blank" rel="noreferrer">llms.txt</a>           |
 | 全文聚合 | <a href="/llms-full.txt" target="_blank" rel="noreferrer">llms-full.txt</a> |
 
 **可直接复制到地址栏或 AI IDE 的路径**（本地开发端口以终端为准，默认多为 `8000`）：
@@ -505,11 +505,23 @@ tips:父节点也为真实节点所以子节点全部选中时父节点不会自
 
 <code src="./demos/table/basic.tsx"></code>
 
+### 自定义 render
+
+自定义渲染内容，需要对表格有定制化时使用。
+
+<code src="./demos/table/custom-render.tsx"></code>
+
 ### 带分页
 
 传入 antd 的 `pagination`（非 `false`）时，组件会为底部分页条预留约 60px，再计算 `scroll.y`。
 
 <code src="./demos/table/pagination.tsx"></code>
+
+### 左侧选中
+
+左侧带选中框，适合需要勾选行的情况下使用。
+
+<code src="./demos/table/check-table.tsx"></code>
 
 ### 表头高度与行高
 
@@ -911,6 +923,10 @@ tips:默认为明日不可选择
 
 <code src="./demos/custom-tabs/basic.tsx"></code>
 
+### TAB 比较多时
+
+<code src="./demos/custom-tabs/large-data.tsx"></code>
+
 ## API
 
 ### CustomTabs
@@ -961,14 +977,27 @@ tips:默认为明日不可选择
 
 <code src="./demos/form-panel/basic.tsx"></code>
 
+### 加载状态
+
+`queryLoading` 为 `true` 时，将查询按钮进行 loading 处理，适合查询请求进行中。
+
+<code src="./demos/form-panel/form-loading.tsx"></code>
+
 ## API
+
+在 [antd Form](https://ant.design/components/form-cn) 的 `FormProps` 上扩展查询区行为。组件内默认 `layout="inline"`；未列出的属性会透传给 `Form`（写在后面的会覆盖默认值，如传入 `layout` 可改为非行内布局），例如 `initialValues`、`name` 等。
 
 ### FormPanel
 
-| 属性     | 说明                                   | 类型        | 默认值 |
-| -------- | -------------------------------------- | ----------- | ------ |
-| width    | 左侧区域宽度（px），影响 flex 固定列宽 | `number`    | `280`  |
-| children | form 表单的 item                       | `ReactNode` | -      |
+| 属性           | 说明                                                                      | 类型                    | 默认值  |
+| -------------- | ------------------------------------------------------------------------- | ----------------------- | ------- |
+| form           | antd `Form` 实例；点击「查询」时会 `validateFields`，通过后调用 `onQuery` | `FormInstance`          | -       |
+| children       | 表单项等内容，置于 `Form` 内                                              | `ReactNode`             | -       |
+| onQuery        | 校验通过后回调，参数为表单字段值                                          | `(values: any) => void` | -       |
+| onReset        | 点击「重置」时回调（仅清空等逻辑需自行在回调中处理）                      | `() => void`            | -       |
+| queryLoading   | 是否显示加载中（确认按钮）                                                | `boolean`               | `false` |
+| useResetButton | 是否渲染「重置」按钮；为 `false` 时仅保留查询侧占位宽度                   | `boolean`               | `true`  |
+| ...FormProps   | 其余与 [Form](https://ant.design/components/form-cn) 一致                 | `FormProps`             | -       |
 
 
 ---

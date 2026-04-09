@@ -22,7 +22,7 @@ toc: content
 
 ### 加载状态
 
-`queryLoading` 为 `true` 时，整体包裹 [Spin](https://ant.design/components/spin-cn)，适合查询请求进行中。
+`queryLoading` 为 `true` 时，将查询按钮进行 loading 处理，适合查询请求进行中。
 
 <code src="./demos/form-panel/form-loading.tsx"></code>
 
@@ -38,6 +38,6 @@ toc: content
 | children       | 表单项等内容，置于 `Form` 内                                              | `ReactNode`             | -       |
 | onQuery        | 校验通过后回调，参数为表单字段值                                          | `(values: any) => void` | -       |
 | onReset        | 点击「重置」时回调（仅清空等逻辑需自行在回调中处理）                      | `() => void`            | -       |
-| queryLoading   | 是否显示加载中（外层 `Spin`）                                             | `boolean`               | `false` |
+| queryLoading   | 是否显示加载中（确认按钮）                                                | `boolean`               | `false` |
 | useResetButton | 是否渲染「重置」按钮；为 `false` 时仅保留查询侧占位宽度                   | `boolean`               | `true`  |
 | ...FormProps   | 其余与 [Form](https://ant.design/components/form-cn) 一致                 | `FormProps`             | -       |

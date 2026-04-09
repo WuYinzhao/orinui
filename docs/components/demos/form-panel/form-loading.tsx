@@ -18,7 +18,7 @@ export default () => {
       <Page style={{ height: 560, border: '1px solid #eee' }}>
         <Content>
           <FormPanel
-            loading={queryLoading}
+            queryLoading={queryLoading}
             form={form}
             onQuery={onQuery}
             onReset={() => {
