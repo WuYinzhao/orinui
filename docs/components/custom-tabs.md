@@ -21,6 +21,10 @@ toc: content
 
 <code src="./demos/custom-tabs/basic.tsx"></code>
 
+### TAB 比较多时
+
+<code src="./demos/custom-tabs/large-data.tsx"></code>
+
 ## API
 
 ### CustomTabs

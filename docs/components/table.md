@@ -24,11 +24,23 @@ toc: content
 
 <code src="./demos/table/basic.tsx"></code>
 
+### 自定义 render
+
+自定义渲染内容，需要对表格有定制化时使用。
+
+<code src="./demos/table/custom-render.tsx"></code>
+
 ### 带分页
 
 传入 antd 的 `pagination`（非 `false`）时，组件会为底部分页条预留约 60px，再计算 `scroll.y`。
 
 <code src="./demos/table/pagination.tsx"></code>
+
+### 左侧选中
+
+左侧带选中框，适合需要勾选行的情况下使用。
+
+<code src="./demos/table/check-table.tsx"></code>
 
 ### 表头高度与行高
 

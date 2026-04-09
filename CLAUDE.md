@@ -4,33 +4,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-这是一个基于 **dumi + father + vite** 的 React 组件库，使用 yarn workspaces 管理多包结构。
+这是一个基于 **dumi + father + vite** 的 React 组件库，使用 **pnpm** 工作区（`pnpm-workspace.yaml`）管理多包结构。
 
 ## 常用命令
 
 ```bash
 # 安装依赖
-yarn install
+pnpm install
 
 # 启动文档开发服务器
-yarn start
+pnpm start
 
 # 构建组件库 (father)
-yarn build
+pnpm build
 
 # 构建组件库 (vite，在 packages/components 目录)
-yarn build:components
+pnpm build:components
 
 # 构建文档
-yarn docs:build
+pnpm docs:build
 
 # 预览文档构建结果
-yarn docs:preview
+pnpm docs:preview
 
 # 代码检查
-yarn lint           # 运行 ESLint + Stylelint
-yarn lint:es        # 仅 ESLint
-yarn lint:css       # 仅 Stylelint
+pnpm lint           # 运行 ESLint + Stylelint
+pnpm lint:es        # 仅 ESLint
+pnpm lint:css       # 仅 Stylelint
 
 # 代码格式化 (通过 lint-staged 自动执行)
 # prettier 配置: 单引号、尾部逗号、80 字符宽度
@@ -77,7 +77,7 @@ yarn lint:css       # 仅 Stylelint
 ## 技术栈
 
 - React 18 + TypeScript
-- antd 4.24.12
+- antd 5.x（见根目录与各包 `package.json` 中 `~5.x` 约束）
 - echarts + echarts-for-react
 - styled-components
 - vite (组件构建)

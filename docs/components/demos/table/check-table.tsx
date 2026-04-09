@@ -1,5 +1,6 @@
 import { Table } from '@orinui/components';
 import { Card } from 'antd';
+import { useState } from 'react';
 
 const columns = [
   { title: '名称', dataIndex: 'name', key: 'name', width: 150 },
@@ -13,14 +14,23 @@ const dataSource = [
 ];
 
 export default () => {
+  const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>([]);
   return (
-    <Card title="基础表格（固定高度 + 纵向滚动由 height 计算）">
+    <Card title="左侧选中">
       <Table
         rowKey="id"
         columns={columns}
         dataSource={dataSource}
         height={300}
         pagination={false}
+        rowSelection={{
+          columnWidth: 48,
+          selectedRowKeys: selectedRowKeys,
+          onChange: (selectedRowKeys: any[]) => {
+            console.log(`selectedRowKeys: ${selectedRowKeys}`);
+            setSelectedRowKeys(selectedRowKeys);
+          },
+        }}
       />
     </Card>
   );

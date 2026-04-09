@@ -6,7 +6,7 @@ alwaysApply: true
 
 ## 项目概览
 
-- **形态**：基于 **dumi + father + Vite** 的 React 组件库；**yarn workspaces**，工作区为 `packages/*`。
+- **形态**：基于 **dumi + father + Vite** 的 React 组件库；**pnpm** 工作区（`pnpm-workspace.yaml`，`packages/*`）。
 - **文档**：dumi，源码与 demo 主要在 [`docs/`](docs/)；根目录配置见 `.dumirc.ts`、`.fatherrc.ts`。
 - **更完整的命令说明**：见仓库根目录 [`CLAUDE.md`](CLAUDE.md)。
 
@@ -14,11 +14,11 @@ alwaysApply: true
 
 | npm 包名 | 路径 | 说明 |
 | --- | --- | --- |
-| `@orinui/components` | `packages/components` | 主组件库；Vite 构建，`yarn build:components` |
-| `@orinui/hooks` | `packages/hooks` | Hooks 包；`yarn build:hooks` |
-| `@orinui/utils` | `packages/utils` | 工具包；`yarn build:utils` |
-| `@orinui/ai-skills` | `packages/ai-skills` | AI skills 包；`yarn build:ai-skills` |
-| 根包 | `src/` | 根入口与示例；father 构建见 `yarn build` / `build:all` |
+| `@orinui/components` | `packages/components` | 主组件库；Vite 构建，`pnpm build:components` |
+| `@orinui/hooks` | `packages/hooks` | Hooks 包；`pnpm build:hooks` |
+| `@orinui/utils` | `packages/utils` | 工具包；`pnpm build:utils` |
+| `@orinui/ai-skills` | `packages/ai-skills` | AI skills 包；`pnpm build:ai-skills` |
+| 根包 | `src/` | 根入口与示例；father 构建见 `pnpm build` / `build:all` |
 
 ## 路径别名（import 优先与 tsconfig 一致）
 
@@ -34,7 +34,7 @@ alwaysApply: true
 
 ## 技术栈与库代码约束
 
-- **React 18**、**TypeScript**（`strict`）、**antd 4.24.x**、**styled-components**；图表相关：**echarts**、**echarts-for-react**。
+- **React 18**、**TypeScript**（`strict`）、**antd 5.x**、**styled-components**；图表相关：**echarts**、**echarts-for-react**。
 - **Vite 库构建**会将 react、react-dom、antd、lodash、echarts、styled-components 等 **external**（见 `packages/components/vite.config.ts` 等）。新增依赖若应作为 peer/external，勿默认打进 bundle；需改对应包的 `rollupOptions.external` 与 `package.json` peerDependencies。
 
 ## 代码风格（与 Prettier 一致）
@@ -50,10 +50,10 @@ ESLint 继承 `@umijs/lint`（[`.eslintrc.js`](.eslintrc.js)）。
 
 ## 常用命令
 
-- 文档开发：`yarn start`（dumi dev）
-- 全量构建：`yarn build` / `yarn build:all`
-- 单包：`yarn build:components`、`yarn build:hooks`、`yarn build:utils`、`yarn build:ai-skills`
-- 校验：`yarn lint`、`yarn lint:es`、`yarn lint:css`
+- 文档开发：`pnpm start`（dumi dev）
+- 全量构建：`pnpm build` / `pnpm build:all`
+- 单包：`pnpm build:components`、`pnpm build:hooks`、`pnpm build:utils`、`pnpm build:ai-skills`
+- 校验：`pnpm lint`、`pnpm lint:es`、`pnpm lint:css`
 
 ## Git 提交
 
